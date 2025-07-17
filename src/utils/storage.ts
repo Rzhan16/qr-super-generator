@@ -207,7 +207,7 @@ export async function trackQRGeneration(type: string, size: number): Promise<voi
     averageQRSize: Math.round((analytics.averageQRSize + size) / 2),
     featuresUsed: {
       ...analytics.featuresUsed,
-      [type]: (analytics.featuresUsed[type] || 0) + 1
+      [type]: ((analytics.featuresUsed as any)[type] || 0) + 1
     }
   };
 
@@ -277,12 +277,13 @@ export async function initializeStorage(): Promise<void> {
       await setStorageData(STORAGE_KEYS.SETTINGS, DEFAULT_SETTINGS);
     } else {
       // Merge with defaults to add any new settings
-      const mergedSettings = {
+      const settings = existingSettings as ExtensionSettings;
+      const mergedSettings: ExtensionSettings = {
         ...DEFAULT_SETTINGS,
-        ...existingSettings,
-        qrOptions: { ...DEFAULT_SETTINGS.qrOptions, ...existingSettings.qrOptions },
-        preferences: { ...DEFAULT_SETTINGS.preferences, ...existingSettings.preferences },
-        analytics: { ...DEFAULT_SETTINGS.analytics, ...existingSettings.analytics }
+        ...settings,
+        qrOptions: { ...DEFAULT_SETTINGS.qrOptions, ...settings.qrOptions },
+        preferences: { ...DEFAULT_SETTINGS.preferences, ...settings.preferences },
+        analytics: { ...DEFAULT_SETTINGS.analytics, ...settings.analytics }
       };
       await setStorageData(STORAGE_KEYS.SETTINGS, mergedSettings);
     }

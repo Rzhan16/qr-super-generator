@@ -1,224 +1,290 @@
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
-import { QrCode, Download, Copy, Settings, History, Zap } from 'lucide-react';
-import { generateQRCode, QROptions } from '../utils/qr-generator';
-import { getCurrentTab, downloadFile } from '../utils/chrome-apis';
+import { QrCode, Wifi, Layers, Zap, Settings, History, Plus, Copy, Download } from 'lucide-react';
+import { getCurrentTab } from '../utils/chrome-apis';
+import { initializeStorage } from '../utils/storage';
+import QRGenerator from './components/QRGenerator';
+import WiFiQRGenerator from './components/WiFiQRGenerator';
+import BatchGenerator from './components/BatchGenerator';
+import { QRCodeData, ExtensionTab } from '../types';
 import './styles.css';
 
-interface Tab {
-  id?: number;
-  url?: string;
-  title?: string;
-}
+type TabType = 'quick' | 'custom' | 'wifi' | 'batch' | 'history';
 
 const App: React.FC = () => {
-  const [currentTab, setCurrentTab] = useState<Tab | null>(null);
-  const [qrDataUrl, setQrDataUrl] = useState<string>('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [customText, setCustomText] = useState('');
-  const [showCustomInput, setShowCustomInput] = useState(false);
-  const [qrOptions, setQrOptions] = useState<QROptions>({
-    width: 256,
-    margin: 1,
-    color: {
-      dark: '#000000',
-      light: '#FFFFFF'
-    },
-    errorCorrectionLevel: 'M'
-  });
+  const [currentTab, setCurrentTab] = useState<ExtensionTab | null>(null);
+  const [activeTab, setActiveTab] = useState<TabType>('quick');
+  const [loading, setLoading] = useState(true);
+  const [recentQRCodes, setRecentQRCodes] = useState<QRCodeData[]>([]);
 
   useEffect(() => {
-    // Get current tab information
-    getCurrentTab().then(tab => {
-      setCurrentTab(tab);
-    }).catch(error => {
-      console.error('Failed to get current tab:', error);
-    });
+    async function initialize() {
+      try {
+        // Initialize storage
+        await initializeStorage();
+        
+        // Get current tab information
+        const tab = await getCurrentTab();
+        setCurrentTab(tab);
+        
+        // Load recent QR codes from storage
+        chrome.storage.local.get(['qrHistory'], (result) => {
+          if (result.qrHistory) {
+            setRecentQRCodes(result.qrHistory.slice(0, 5));
+          }
+        });
+        
+      } catch (error) {
+        console.error('Failed to initialize app:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    initialize();
   }, []);
 
-  const handleGenerateQR = async (text?: string) => {
-    setIsGenerating(true);
-    try {
-      const qrText = text || currentTab?.url || '';
-      if (!qrText) {
-        throw new Error('No URL or text to generate QR code');
-      }
+  // Handle QR generation completion
+  const handleQRGenerated = (qrData: QRCodeData) => {
+    // Update recent QR codes
+    setRecentQRCodes(prev => {
+      const filtered = prev.filter(item => item.text !== qrData.text);
+      return [qrData, ...filtered].slice(0, 5);
+    });
+  };
 
-      const dataUrl = await generateQRCode(qrText, qrOptions);
-      setQrDataUrl(dataUrl);
-      
-      // Save to storage for history
-      chrome.storage.local.get(['qrHistory'], (result) => {
-        const history = result.qrHistory || [];
-        const newEntry = {
-          id: Date.now(),
-          text: qrText,
-          dataUrl,
-          timestamp: new Date().toISOString(),
-          title: currentTab?.title || 'Custom QR Code'
-        };
-        
-        const updatedHistory = [newEntry, ...history.slice(0, 9)]; // Keep last 10
-        chrome.storage.local.set({ qrHistory: updatedHistory });
-      });
-    } catch (error) {
-      console.error('Failed to generate QR code:', error);
-      alert('Failed to generate QR code. Please try again.');
-    } finally {
-      setIsGenerating(false);
+  // Tab configuration
+  const tabs = [
+    {
+      id: 'quick' as TabType,
+      label: 'Quick',
+      icon: Zap,
+      description: 'Current page QR'
+    },
+    {
+      id: 'custom' as TabType,
+      label: 'Custom',
+      icon: QrCode,
+      description: 'Custom text/URL'
+    },
+    {
+      id: 'wifi' as TabType,
+      label: 'WiFi',
+      icon: Wifi,
+      description: 'WiFi credentials'
+    },
+    {
+      id: 'batch' as TabType,
+      label: 'Batch',
+      icon: Layers,
+      description: 'Multiple tabs'
+    },
+    {
+      id: 'history' as TabType,
+      label: 'History',
+      icon: History,
+      description: 'Recent QR codes'
     }
-  };
+  ];
 
-  const handleDownload = () => {
-    if (!qrDataUrl) return;
-    
-    const filename = `qr-code-${Date.now()}.png`;
-    downloadFile(qrDataUrl, filename);
-  };
-
-  const handleCopy = async () => {
-    if (!qrDataUrl) return;
-    
-    try {
-      // Convert data URL to blob
-      const response = await fetch(qrDataUrl);
-      const blob = await response.blob();
-      
-      await navigator.clipboard.write([
-        new ClipboardItem({
-          [blob.type]: blob
-        })
-      ]);
-      
-      // Show success feedback
-      const button = document.getElementById('copy-btn');
-      if (button) {
-        const originalText = button.textContent;
-        button.textContent = 'Copied!';
-        setTimeout(() => {
-          button.textContent = originalText;
-        }, 2000);
-      }
-    } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
-      // Fallback: copy the URL
-      navigator.clipboard.writeText(currentTab?.url || '');
-    }
-  };
+  if (loading) {
+    return (
+      <div className="w-full h-full bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+          <p className="text-sm text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full h-full bg-gray-50 p-4">
+    <div className="w-full h-full bg-gray-50">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-2">
-          <QrCode className="w-6 h-6 text-primary-600" />
-          <h1 className="text-lg font-semibold text-gray-800">QR Super Generator</h1>
-        </div>
-        <div className="flex space-x-2">
-          <button className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
-            <History className="w-4 h-4 text-gray-600" />
-          </button>
-          <button className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
-            <Settings className="w-4 h-4 text-gray-600" />
-          </button>
+      <div className="bg-white border-b px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <QrCode className="w-5 h-5 text-blue-600" />
+            <h1 className="font-semibold text-gray-900">QR Super Generator</h1>
+          </div>
+          <div className="flex items-center space-x-1">
+            <button className="p-1.5 text-gray-400 hover:text-gray-600 rounded">
+              <Settings className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Current Page Info */}
-      {currentTab && (
-        <div className="bg-white p-4 rounded-lg border mb-4">
-          <div className="flex items-start space-x-3">
-            <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Zap className="w-4 h-4 text-primary-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-gray-900 text-sm mb-1">Current Page</h3>
-              <p className="text-xs text-gray-600 truncate" title={currentTab.title}>
-                {currentTab.title}
-              </p>
-              <p className="text-xs text-gray-500 truncate" title={currentTab.url}>
-                {currentTab.url}
-              </p>
-            </div>
-          </div>
-          
-          <button
-            onClick={() => handleGenerateQR()}
-            disabled={isGenerating}
-            className="w-full mt-3 bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-          >
-            {isGenerating ? 'Generating...' : 'Generate QR Code'}
-          </button>
+      {/* Tab Navigation */}
+      <div className="bg-white border-b">
+        <div className="flex overflow-x-auto scrollbar-thin">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-shrink-0 flex flex-col items-center px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-blue-600 text-blue-600 bg-blue-50'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <Icon className="w-4 h-4 mb-1" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
-      )}
+      </div>
 
-      {/* Custom Text Input */}
-      <div className="bg-white p-4 rounded-lg border mb-4">
-        <button
-          onClick={() => setShowCustomInput(!showCustomInput)}
-          className="flex items-center justify-between w-full text-left"
-        >
-          <span className="text-sm font-medium text-gray-900">Custom Text/URL</span>
-          <span className="text-xs text-gray-500">
-            {showCustomInput ? 'Hide' : 'Show'}
-          </span>
-        </button>
-        
-        {showCustomInput && (
-          <div className="mt-3">
-            <textarea
-              value={customText}
-              onChange={(e) => setCustomText(e.target.value)}
-              placeholder="Enter custom text or URL..."
-              className="w-full p-3 border rounded-lg text-sm resize-none h-20 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-            <button
-              onClick={() => handleGenerateQR(customText)}
-              disabled={!customText.trim() || isGenerating}
-              className="w-full mt-2 bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-            >
-              Generate Custom QR
-            </button>
+      {/* Tab Content */}
+      <div className="flex-1 overflow-y-auto p-4 pb-6">
+        {activeTab === 'quick' && (
+          <div className="space-y-4">
+            {currentTab && (
+              <QRGenerator
+                initialText={currentTab.url || ''}
+                initialType="url"
+                onQRGenerated={handleQRGenerated}
+              />
+            )}
+            
+            {recentQRCodes.length > 0 && (
+              <div className="bg-white rounded-lg border p-4">
+                <h3 className="font-medium text-gray-900 mb-3">Recent QR Codes</h3>
+                <div className="space-y-2">
+                  {recentQRCodes.map((qr) => (
+                    <div key={qr.id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded">
+                      <img src={qr.dataUrl} alt="QR" className="w-8 h-8 border rounded" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{qr.title}</p>
+                        <p className="text-xs text-gray-500 truncate">{qr.text}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'custom' && (
+          <QRGenerator
+            initialType="custom"
+            onQRGenerated={handleQRGenerated}
+          />
+        )}
+
+        {activeTab === 'wifi' && (
+          <WiFiQRGenerator
+            onQRGenerated={handleQRGenerated}
+          />
+        )}
+
+        {activeTab === 'batch' && (
+          <BatchGenerator
+            onBatchComplete={(results) => {
+              // Update recent QR codes with batch results
+              if (results.length > 0) {
+                setRecentQRCodes(prev => {
+                  const combined = [...results, ...prev];
+                  return combined.slice(0, 10);
+                });
+              }
+            }}
+          />
+        )}
+
+        {activeTab === 'history' && (
+          <div className="bg-white rounded-lg border p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-gray-900">QR Code History</h3>
+              <button
+                onClick={() => {
+                  chrome.storage.local.set({ qrHistory: [] });
+                  setRecentQRCodes([]);
+                }}
+                className="text-sm text-red-600 hover:text-red-700"
+              >
+                Clear All
+              </button>
+            </div>
+            
+            {recentQRCodes.length === 0 ? (
+              <div className="text-center py-8">
+                <QrCode className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <p className="text-sm text-gray-600">No QR codes generated yet</p>
+                <button
+                  onClick={() => setActiveTab('quick')}
+                  className="mt-2 text-sm text-blue-600 hover:text-blue-700"
+                >
+                  Generate your first QR code
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {recentQRCodes.map((qr) => (
+                  <div key={qr.id} className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50">
+                    <img src={qr.dataUrl} alt="QR" className="w-12 h-12 border rounded" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-2 mb-1">
+                        <h4 className="text-sm font-medium text-gray-900 truncate">{qr.title}</h4>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                          qr.type === 'url' ? 'bg-blue-100 text-blue-800' :
+                          qr.type === 'wifi' ? 'bg-green-100 text-green-800' :
+                          qr.type === 'text' ? 'bg-gray-100 text-gray-800' :
+                          'bg-purple-100 text-purple-800'
+                        }`}>
+                          {qr.type}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 break-all">{qr.text}</p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {new Date(qr.timestamp).toLocaleDateString()} {new Date(qr.timestamp).toLocaleTimeString()}
+                      </p>
+                    </div>
+                    <div className="flex flex-col space-y-1">
+                      <button
+                        onClick={async () => {
+                          try {
+                            const response = await fetch(qr.dataUrl);
+                            const blob = await response.blob();
+                            await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+                          } catch (err) {
+                            console.error('Copy failed:', err);
+                          }
+                        }}
+                        className="p-1 text-gray-400 hover:text-gray-600 rounded"
+                        title="Copy"
+                      >
+                        <Copy className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = qr.dataUrl;
+                          link.download = `${qr.title.replace(/[^a-z0-9]/gi, '_')}.png`;
+                          link.click();
+                        }}
+                        className="p-1 text-gray-400 hover:text-gray-600 rounded"
+                        title="Download"
+                      >
+                        <Download className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* QR Code Display */}
-      {qrDataUrl && (
-        <div className="bg-white p-4 rounded-lg border">
-          <div className="flex flex-col items-center">
-            <img
-              src={qrDataUrl}
-              alt="Generated QR Code"
-              className="w-48 h-48 border rounded-lg mb-4"
-            />
-            
-            <div className="flex space-x-2 w-full">
-              <button
-                id="copy-btn"
-                onClick={handleCopy}
-                className="flex-1 flex items-center justify-center space-x-2 py-2 px-4 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-sm font-medium"
-              >
-                <Copy className="w-4 h-4" />
-                <span>Copy</span>
-              </button>
-              
-              <button
-                onClick={handleDownload}
-                className="flex-1 flex items-center justify-center space-x-2 py-2 px-4 bg-primary-600 text-white hover:bg-primary-700 rounded-lg transition-colors text-sm font-medium"
-              >
-                <Download className="w-4 h-4" />
-                <span>Download</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Footer */}
-      <div className="mt-6 text-center">
-        <p className="text-xs text-gray-500">
-          Press Ctrl+Shift+Q (Cmd+Shift+Q on Mac) for quick QR generation
+      <div className="bg-white border-t px-4 py-2">
+        <p className="text-xs text-gray-500 text-center">
+          Press Ctrl+Shift+Q (⌘+Shift+Q) for quick QR generation
         </p>
       </div>
     </div>
