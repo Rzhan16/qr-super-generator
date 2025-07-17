@@ -45,4 +45,18 @@ src/
 - Security best practices
 - User feedback systems
 
+## IMPORTANT: Git Workflow
+After completing ANY prompt or making changes:
+1. ALWAYS run: git add .
+2. ALWAYS commit with descriptive message: git commit -m "Brief description of changes"
+3. ALWAYS push to GitHub: git push origin master
+4. Use descriptive commit messages that explain what was implemented
+
+## Git Commit Message Format
+- "feat: implement [feature]" for new features
+- "fix: resolve [issue]" for bug fixes
+- "style: update [component] styling" for UI changes
+- "config: update [configuration]" for config changes
+- "docs: update [documentation]" for documentation
+
 Generate production-ready code that works immediately. 
