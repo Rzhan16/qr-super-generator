@@ -4,10 +4,13 @@
   "description": "QR Super Generator - Advanced Chrome Extension for QR Code Generation with Analytics and Batch Processing",
   "main": "dist/popup.js",
   "scripts": {
-    "build": "webpack --mode=production",
-    "dev": "webpack --mode=development --watch",
+    "build": "npm run clean && npm run generate-icons && webpack --mode=production",
+    "dev": "npm run generate-icons && webpack --mode=development --watch",
     "clean": "rm -rf dist",
+    "generate-icons": "node scripts/generate-icons.js",
     "package": "npm run build && cd dist && zip -r ../qr-super-generator.zip .",
+    "type-check": "tsc --noEmit",
+    "lint": "echo 'Linting not configured yet'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -30,6 +33,7 @@
   },
   "homepage": "https://github.com/Rzhan16/qr-super-generator#readme",
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.11",
     "@types/chrome": "^0.1.1",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^19.1.8",

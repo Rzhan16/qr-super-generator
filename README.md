@@ -55,27 +55,83 @@ npm run package
 - **Chrome APIs**: Manifest V3 (tabs, storage, downloads)
 - **Export**: JSZip + FileSaver.js
 
+## 🏗️ Build Commands
+
+```bash
+# Development with hot reload
+npm run dev
+
+# Production build
+npm run build
+
+# Clean build artifacts
+npm run clean
+
+# Generate extension icons
+npm run generate-icons
+
+# Create ZIP package for Chrome Web Store
+npm run package
+
+# Type checking
+npm run type-check
+```
+
+## 📖 Usage Guide
+
+### Basic QR Generation
+1. Click the extension icon in Chrome's toolbar
+2. The popup will show the current page information
+3. Click "Generate QR Code" to create a QR for the current page
+4. Use "Custom Text/URL" section for custom content
+5. Download or copy the generated QR code
+
+### Keyboard Shortcuts
+- **Ctrl+Shift+Q** (Windows/Linux) or **Cmd+Shift+Q** (Mac): Quick QR generation
+
+### Advanced Features
+- **WiFi QR Codes**: Share WiFi credentials
+- **Contact QR Codes**: Generate vCard format
+- **Calendar Events**: Create event QR codes
+- **Batch Processing**: Generate QRs for multiple tabs
+- **Custom Styling**: Adjust colors, sizes, error correction
+
 ## 📁 Project Structure
 
 ```
 src/
-├── manifest.json          # Chrome extension manifest
-├── background/             # Background scripts
-│   └── background.ts
+├── manifest.json          # Chrome extension manifest V3
+├── background/             # Service worker scripts
+│   └── background.ts       # Extension lifecycle & commands
 ├── popup/                  # Main popup interface
-│   ├── popup.html
-│   ├── popup.tsx
-│   └── components/
+│   ├── popup.html         # Popup shell with React mount
+│   ├── popup.tsx          # Main React app component
+│   ├── styles.css         # Tailwind CSS imports & custom styles
+│   └── components/        # React components (future)
 ├── content/                # Content scripts
-│   └── content.ts
+│   └── content.ts         # Page interaction & clipboard
 ├── utils/                  # Utility functions
-│   ├── qr-generator.ts
-│   ├── storage.ts
-│   └── analytics.ts
+│   ├── qr-generator.ts    # QRCode.js integration
+│   └── chrome-apis.ts     # Chrome API wrappers
 ├── types/                  # TypeScript definitions
-│   └── index.ts
-└── icons/                  # Extension icons
+│   └── index.ts           # Comprehensive type definitions
+├── icons/                  # Extension icons
+│   ├── icon.svg           # Source SVG icon
+│   ├── icon16.png         # 16x16 PNG
+│   ├── icon32.png         # 32x32 PNG
+│   ├── icon48.png         # 48x48 PNG
+│   └── icon128.png        # 128x128 PNG
+└── scripts/               # Build utilities
+    └── generate-icons.js  # Icon generation script
 ```
+
+## ⚙️ Configuration Files
+
+- `webpack.config.js` - React + TypeScript + Tailwind bundling
+- `tailwind.config.js` - Custom styling configuration
+- `tsconfig.json` - TypeScript configuration for React
+- `postcss.config.js` - PostCSS with Tailwind and Autoprefixer
+- `package.json` - Dependencies and build scripts
 
 ## 🎯 Roadmap
 
