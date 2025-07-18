@@ -306,7 +306,7 @@ const WiFiQRGenerator: React.FC<WiFiQRGeneratorProps> = ({
       <button
         onClick={generateQR}
         disabled={!isValid || isGenerating || (requiresPassword && !wifiData.password.trim())}
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+        className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
       >
         {isGenerating ? 'Generating...' : 'Generate WiFi QR Code'}
       </button>
@@ -357,7 +357,7 @@ const WiFiQRGenerator: React.FC<WiFiQRGeneratorProps> = ({
             
             <button
               onClick={handleDownload}
-              className="flex-1 flex items-center justify-center space-x-2 py-2 px-4 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors text-sm font-medium"
+              className="flex-1 flex items-center justify-center space-x-2 py-2 px-4 bg-primary-600 text-white hover:bg-primary-700 rounded-lg transition-colors text-sm font-medium"
             >
               <Download className="w-4 h-4" />
               <span>Download</span>

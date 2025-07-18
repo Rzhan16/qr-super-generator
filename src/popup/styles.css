@@ -13,22 +13,41 @@
     margin: 0;
     padding: 0;
     width: 400px;
-    min-height: 500px;
+    min-height: 600px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b  50%, #334155 100%);
+    color: #f8fafc;
+    overflow: hidden;
   }
   
   #root {
     width: 100%;
-    min-height: 500px;
+    min-height: 600px;
+    position: relative;
+  }
+  
+  /* Glassmorphism base styles */
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  }
+  
+  .glass-dark {
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   }
 }
 
 @layer components {
   /* Button variants */
   .btn-primary {
-    @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+    @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
   }
   
   .btn-secondary {
@@ -176,6 +195,54 @@
   }
 }
 
+@keyframes glassFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(5px) rotate(-1deg);
+  }
+}
+
+@keyframes pulseNeon {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(147, 51, 234, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(147, 51, 234, 0.6), 0 0 40px rgba(59, 130, 246, 0.3);
+  }
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
 /* Pulse animation for loading states */
 @keyframes pulse {
   0%, 100% {
@@ -222,7 +289,7 @@
 }
 
 .progress-fill {
-  @apply h-full bg-blue-600 transition-all duration-300 ease-out;
+  @apply h-full bg-primary-600 transition-all duration-300 ease-out;
 }
 
 /* Tab navigation */
@@ -272,6 +339,35 @@
          hover:border-gray-400 transition-colors;
 }
 
+/* Glassmorphism specific utilities */
+@layer utilities {
+  .glass-card {
+    @apply glass rounded-xl p-6 transition-all duration-300 hover:bg-glass-200;
+  }
+  
+  .glass-button {
+    @apply glass rounded-lg px-4 py-2 transition-all duration-200 hover:bg-glass-200 active:scale-95;
+  }
+  
+  .glass-input {
+    @apply glass-dark rounded-lg px-3 py-2 text-white placeholder-gray-400 border-0 focus:ring-2 focus:ring-primary-500 transition-all duration-200;
+  }
+  
+  .neon-border {
+    @apply border border-primary-500 shadow-neon-sm;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent;
+  }
+  
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+}
+
 /* Responsive adjustments */
 @media (max-width: 420px) {
   body {
@@ -294,9 +390,31 @@
   }
 }
 
-/* Dark mode support (for future implementation) */
-@media (prefers-color-scheme: dark) {
-  .dark-mode-support {
-    @apply bg-gray-900 text-white;
-  }
+/* Scrollbar styling for dark theme */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(147, 51, 234, 0.5);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(147, 51, 234, 0.7);
+}
+
+/* Selection styling */
+::selection {
+  background: rgba(147, 51, 234, 0.3);
+  color: #f8fafc;
+}
+
+/* Focus ring for accessibility */
+.focus-visible {
+  @apply outline-none ring-2 ring-primary-500 ring-opacity-50;
 }
