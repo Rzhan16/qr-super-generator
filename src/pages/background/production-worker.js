@@ -284,6 +284,9 @@ function handleMessage(message, sender, sendResponse) {
           await storeQRInHistory(message.qrData);
           return { success: true };
           
+        case 'GENERATE_QR_CONTENT':
+          return await generateQRForContent(message);
+          
         default:
           console.warn('⚠️ Unknown message type:', message.type);
           return { success: false, error: 'Unknown message type' };
@@ -391,6 +394,44 @@ async function handleTabUpdate(tabId, changeInfo, tab) {
     } catch (error) {
       console.log('⚠️ Auto-generation check failed:', error.message);
     }
+  }
+}
+
+// Generate QR code for content script
+async function generateQRForContent(message) {
+  try {
+    console.log('🎯 Generating QR for content script:', message.text?.substring(0, 50));
+    
+    // Since service workers can't easily generate QR codes (no DOM/Canvas),
+    // we'll return a simple response that tells the content script to generate locally
+    // or we could store the request for the popup to handle
+    
+    const qrData = {
+      text: message.text,
+      options: message.options || {},
+      timestamp: Date.now(),
+      id: Date.now().toString()
+    };
+    
+    // Store the QR request for the popup to potentially use
+    await chrome.storage.local.set({
+      pendingQRGeneration: qrData
+    });
+    
+    // For now, return a success but indicate content script should handle generation
+    return {
+      success: true,
+      shouldGenerateLocally: true,
+      qrData: qrData,
+      message: 'QR generation should be handled by content script locally'
+    };
+    
+  } catch (error) {
+    console.error('❌ Content QR generation failed:', error);
+    return {
+      success: false,
+      error: error.message
+    };
   }
 }
 

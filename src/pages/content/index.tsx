@@ -8,6 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { QrCode, X, Copy, Download, Minimize2, Maximize2 } from 'lucide-react';
+import QRCode from 'qrcode';
 import './style.css';
 
 interface QRWidgetState {
@@ -83,6 +84,7 @@ function QRWidget() {
     
     switch (message.type) {
       case 'GENERATE_QR':
+      case 'AUTO_GENERATE_QR':
         generateQRCode(message.text || window.location.href);
         break;
       case 'SHOW_WIDGET':
@@ -94,6 +96,8 @@ function QRWidget() {
       case 'TOGGLE_WIDGET':
         setState(prev => ({ ...prev, visible: !prev.visible }));
         break;
+      default:
+        console.debug('Unknown message type:', message.type);
     }
   };
 
@@ -114,31 +118,50 @@ function QRWidget() {
     }));
 
     try {
-      console.log('🎯 Generating QR code for:', text.substring(0, 50) + '...');
+      console.log('🎯 Generating QR code locally for:', text.substring(0, 50) + '...');
 
-      // Send message to background script to generate QR
-      const response = await chrome.runtime.sendMessage({
-        type: 'GENERATE_QR_CONTENT',
-        text: text,
-        options: {
-          width: 200,
-          color: {
-            dark: '#9333ea',
-            light: '#ffffff'
-          }
-        }
-      });
+      // Generate QR code locally using QRCode library
+      const qrOptions = {
+        width: 200,
+        margin: 2,
+        color: {
+          dark: '#9333ea',
+          light: '#ffffff'
+        },
+        errorCorrectionLevel: 'M' as const
+      };
 
-      if (response.success) {
-        setState(prev => ({
-          ...prev,
-          qrDataUrl: response.dataUrl,
-          isGenerating: false
-        }));
-        console.log('✅ QR code generated successfully');
-      } else {
-        throw new Error(response.error || 'Failed to generate QR code');
+      const dataUrl = await QRCode.toDataURL(text, qrOptions);
+
+      setState(prev => ({
+        ...prev,
+        qrDataUrl: dataUrl,
+        isGenerating: false
+      }));
+
+      // Store QR data in extension storage for history
+      try {
+        const qrData = {
+          text,
+          dataUrl,
+          timestamp: Date.now(),
+          id: Date.now().toString(),
+          type: text.startsWith('http') ? 'url' : 'text'
+        };
+
+        chrome.runtime.sendMessage({
+          type: 'STORE_QR_DATA',
+          qrData
+        }).catch(() => {
+          // Ignore storage errors - QR still works
+          console.debug('Could not store QR in history');
+        });
+      } catch (storageError) {
+        // Ignore storage errors - QR generation still succeeded
+        console.debug('Could not store QR data:', storageError);
       }
+
+      console.log('✅ QR code generated successfully');
 
     } catch (error) {
       console.error('❌ QR generation failed:', error);
