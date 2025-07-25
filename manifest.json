@@ -44,7 +44,7 @@
     }
   ],
   "background": {
-    "service_worker": "src/pages/background/minimal-worker.js"
+    "service_worker": "src/pages/background/production-worker.js"
   },
   "devtools_page": "src/pages/devtools/index.html",
   "web_accessible_resources": [

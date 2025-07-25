@@ -64,15 +64,17 @@ class AnalyticsService {
 
   private async initializeAnalytics() {
     try {
-      // Check if we're in a service worker context
-      if (typeof window === 'undefined' && typeof (globalThis as any).importScripts !== 'undefined') {
-        // Service worker context - disable analytics to avoid errors
+      // Always disable analytics in service worker context or when chrome APIs unavailable
+      if (typeof window === 'undefined' || 
+          typeof (globalThis as any).importScripts !== 'undefined' ||
+          typeof chrome === 'undefined' || 
+          !chrome.storage) {
         this.isEnabled = false;
-        console.log('Analytics disabled in service worker context');
+        console.log('Analytics disabled - incompatible environment');
         return;
       }
 
-      // Check user consent and settings
+      // Check user consent and settings using chrome.storage.local ONLY
       const result = await chrome.storage.local.get(['analyticsEnabled', 'userId']);
       this.isEnabled = result.analyticsEnabled !== false; // Opt-out by default
       
@@ -81,7 +83,7 @@ class AnalyticsService {
         await chrome.storage.local.set({ userId });
       }
 
-      // Start session tracking
+      // Start session tracking (no localStorage usage)
       this.trackEvent('session', 'start', {
         timestamp: this.sessionStart,
         userAgent: navigator?.userAgent || 'Unknown',
@@ -89,13 +91,13 @@ class AnalyticsService {
         language: navigator?.language || 'Unknown'
       });
 
-      // Set up periodic flush
+      // Set up periodic flush using chrome storage
       this.flushTimer = setInterval(() => {
         this.flushEvents();
       }, 30000); // Flush every 30 seconds
 
-      // Track session end on unload
-      if (typeof window !== 'undefined') {
+      // Track session end on unload (only in popup/content script context)
+      if (typeof window !== 'undefined' && window.addEventListener) {
         window.addEventListener('beforeunload', () => {
           this.endSession();
         });
@@ -103,6 +105,7 @@ class AnalyticsService {
 
     } catch (error) {
       console.warn('Analytics initialization failed:', error);
+      this.isEnabled = false; // Disable on any error
     }
   }
 

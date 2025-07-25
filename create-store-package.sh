@@ -19,16 +19,16 @@ fi
 echo "🔧 Fixing service worker issues..."
 ./fix-service-worker.sh
 
-# Step 1.6: Apply minimal service worker fix
-echo "🔧 Applying minimal service worker..."
-cp src/pages/background/minimal-worker.js dist_chrome/background.js
-# Update manifest to use minimal worker
+# Step 1.6: Apply production service worker fix
+echo "🔧 Applying production service worker..."
+cp src/pages/background/production-worker.js dist_chrome/background.js
+# Update manifest to use production worker
 node -e "
 const fs = require('fs');
 const manifest = JSON.parse(fs.readFileSync('dist_chrome/manifest.json', 'utf8'));
 manifest.background.service_worker = 'background.js';
 fs.writeFileSync('dist_chrome/manifest.json', JSON.stringify(manifest, null, 2));
-console.log('✅ Updated manifest to use minimal service worker');
+console.log('✅ Updated manifest to use production service worker');
 "
 
 # Step 2: Create ZIP package
