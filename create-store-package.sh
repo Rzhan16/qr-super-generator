@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# QR Super Generator - Simple Store Package Creator
+# Creates a ZIP file ready for Chrome Web Store upload
+
+echo "🚀 Creating Chrome Web Store Package..."
+echo ""
+
+# Step 1: Build the extension
+echo "📦 Building extension..."
+npm run build
+
+if [ $? -ne 0 ]; then
+    echo "❌ Build failed! Please fix any errors and try again."
+    exit 1
+fi
+
+# Step 2: Create ZIP package
+echo "📁 Creating ZIP package..."
+cd dist_chrome
+
+# Create the ZIP file
+zip -r ../qr-super-generator-store.zip . -x "*.DS_Store" "*/.git*" "*.map"
+
+cd ..
+
+# Step 3: Verify package
+if [ -f "qr-super-generator-store.zip" ]; then
+    size=$(du -h qr-super-generator-store.zip | cut -f1)
+    echo ""
+    echo "✅ Package created successfully!"
+    echo "📦 File: qr-super-generator-store.zip"
+    echo "📏 Size: $size"
+    echo ""
+    echo "🌐 Ready for Chrome Web Store upload!"
+    echo ""
+    echo "Next steps:"
+    echo "1. Go to: https://chrome.google.com/webstore/developer/dashboard"
+    echo "2. Click 'Add new item'"
+    echo "3. Upload: qr-super-generator-store.zip"
+    echo "4. Follow the guide in CHROME_WEB_STORE_GUIDE.md"
+    echo ""
+else
+    echo "❌ Failed to create package!"
+    exit 1
+fi

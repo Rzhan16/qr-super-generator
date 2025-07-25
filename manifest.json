@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "QR Super Generator - Premium",
-  "description": "Premium QR code generator with auto-generation, specialized components (WiFi, batch), floating widget, and comprehensive debugging",
+  "name": "QR Super Generator",
+  "description": "Ultimate QR code generator with auto-generation, WiFi support, batch processing, floating widget, and professional features",
   "version": "1.0.0",
   "options_ui": {
     "page": "src/pages/options/index.html"

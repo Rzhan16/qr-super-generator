@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { QrCode, Settings, History, Zap, Wifi, Layers, BarChart3, AlertTriangle } from 'lucide-react';
+import { QrCode, Settings, History, Zap, Wifi, Layers, AlertTriangle } from 'lucide-react';
 import { debug } from '../../utils/debug';
 import { qrService } from '../../utils/qr-service';
 import { storageService } from '../../utils/storage-service';
@@ -15,13 +15,13 @@ import chromeAPIs from '../../utils/chrome-apis';
 import QRGenerator from '../../components/QRGenerator';
 import WiFiQRGenerator from '../../components/WiFiQRGenerator';
 import BatchGenerator from '../../components/BatchGenerator';
-import PremiumFeatures from '../../components/PremiumFeatures';
+// import PremiumFeatures from '../../components/PremiumFeatures'; // Disabled for free version
 
 interface PopupState {
-  activeTab: 'quick' | 'generator' | 'wifi' | 'batch' | 'history' | 'premium';
+  activeTab: 'quick' | 'generator' | 'wifi' | 'batch' | 'history';
   error: string | null;
   history: QRCodeData[];
-  showPremium: boolean;
+  // showPremium: boolean; // Removed for free version
   currentTabInfo: any;
   pendingGeneration: any;
 }
@@ -31,7 +31,7 @@ export default function Popup() {
     activeTab: 'quick',
     error: null,
     history: [],
-    showPremium: false,
+    // showPremium: false, // Removed for free version
     currentTabInfo: null,
     pendingGeneration: null
   });
@@ -232,13 +232,7 @@ export default function Popup() {
                 🌐
               </button>
             )}
-            <button
-              onClick={() => setState(prev => ({ ...prev, showPremium: true }))}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-              title="Premium Features"
-            >
-              <BarChart3 className="w-4 h-4" />
-            </button>
+            {/* Premium button removed for free version */}
           </div>
         </div>
         
@@ -260,8 +254,7 @@ export default function Popup() {
             { id: 'generator', icon: QrCode, label: 'Generator' },
             { id: 'wifi', icon: Wifi, label: 'WiFi' },
             { id: 'batch', icon: Layers, label: 'Batch' },
-            { id: 'history', icon: History, label: 'History' },
-            { id: 'premium', icon: BarChart3, label: 'Premium' }
+            { id: 'history', icon: History, label: 'History' }
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = state.activeTab === tab.id;
@@ -420,13 +413,7 @@ export default function Popup() {
           </div>
         )}
 
-        {state.activeTab === 'premium' && (
-          <PremiumFeatures 
-            onFeatureClick={(feature) => {
-              debug.info(component, '✨ Premium feature clicked', { featureId: feature.id });
-            }}
-          />
-        )}
+        {/* Premium features removed for free version */}
       </div>
 
       {/* Premium Modal overlay handled by PremiumFeatures component */}

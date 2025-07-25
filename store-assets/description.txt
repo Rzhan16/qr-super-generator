@@ -1,6 +1,6 @@
-🚀 QR Super Generator - The Ultimate QR Code Extension for Chrome
+🚀 QR Super Generator - The Ultimate FREE QR Code Extension for Chrome
 
-Transform any content into beautiful QR codes instantly! QR Super Generator is a premium Chrome extension that makes creating and sharing QR codes effortless.
+Transform any content into beautiful QR codes instantly! QR Super Generator is a powerful Chrome extension that makes creating and sharing QR codes effortless and completely free.
 
 ✨ KEY FEATURES:
 
@@ -20,33 +20,34 @@ Transform any content into beautiful QR codes instantly! QR Super Generator is a
 • Bulk export as ZIP, JSON, CSV, PDF, HTML
 • Perfect for sharing multiple links at once
 
-🎨 PREMIUM CUSTOMIZATION
-• Custom branding and logo integration
-• Remove watermarks with premium upgrade
-• Professional styling options
-• Team collaboration features
+🎨 PROFESSIONAL CUSTOMIZATION
+• Beautiful glassmorphism UI design
+• Custom styling options
+• Professional branding features
+• Dark theme optimized interface
 
-📊 SMART ANALYTICS
+📊 SMART ANALYTICS (Optional)
 • Track usage patterns (privacy-compliant)
 • Performance insights and statistics
-• Export analytics for business use
+• Export analytics for personal use
+• Completely anonymous and local
 
 🌐 PRIVACY-FIRST DESIGN
 • All QR generation happens locally
 • No data sent to external servers
 • GDPR and CCPA compliant
-• Optional anonymous analytics
+• Optional anonymous analytics only
 
 💎 MODERN INTERFACE
 • Beautiful glassmorphism UI design
 • Responsive and intuitive controls
-• Dark theme optimized
 • Smooth animations and transitions
+• Optimized for productivity
 
 🚀 DEVELOPER-FRIENDLY
 • Manifest V3 compliance
 • Open source architecture
-• Comprehensive API access
+• Comprehensive feature set
 • Regular updates and improvements
 
 Perfect for:
@@ -55,19 +56,32 @@ Perfect for:
 • Business card digital sharing
 • Event promotion and marketing
 • Educational content distribution
-• Team collaboration projects
+• Personal and professional use
 
-Experience the future of QR code generation with our privacy-first, feature-rich extension. Join thousands of users who trust QR Super Generator for their daily QR code needs.
+Experience the most advanced FREE QR code generator for Chrome. Join thousands of users who trust QR Super Generator for their daily QR code needs.
 
 ⭐ WHAT USERS SAY:
-"Best QR generator I've used! The auto-generation feature is a game-changer."
-"Love the batch processing for sharing multiple links with clients."
+"Best free QR generator I've used! The auto-generation feature is a game-changer."
+"Love the batch processing for sharing multiple links with friends."
 "Clean interface and works perfectly. Highly recommended!"
 
-📈 PREMIUM FEATURES:
-Upgrade to unlock unlimited generation, custom branding, advanced analytics, team features, and priority support.
-
 🔒 SECURITY & COMPLIANCE:
-Built with security in mind, following Chrome Web Store guidelines and privacy regulations. Your data stays on your device.
+Built with security in mind, following Chrome Web Store guidelines and privacy regulations. Your data stays on your device, ensuring complete privacy.
 
-Get started today and experience the most advanced QR code generator for Chrome!
+📈 100% FREE FEATURES:
+• Unlimited QR code generation
+• All QR types supported
+• Batch processing included
+• Export functionality
+• Auto-generation enabled
+• No ads, no limits, no subscriptions
+
+🎯 WHY CHOOSE QR SUPER GENERATOR:
+• Completely free with no hidden costs
+• Professional quality features
+• Privacy-first approach
+• Beautiful modern design
+• Regular feature updates
+• Excellent user support
+
+Get started today and experience the most advanced free QR code generator for Chrome!
