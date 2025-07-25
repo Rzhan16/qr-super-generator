@@ -68,8 +68,8 @@ async function initializeStorage() {
     ]);
     
     const defaults = {
-      autoGenerate: true,
-      showWidget: true,
+      autoGenerate: false,  // Disable auto-popup by default
+      showWidget: false,    // Disable auto-widget by default
       qrHistory: [],
       settings: {
         defaultSize: 256,

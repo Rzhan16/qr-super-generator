@@ -403,7 +403,7 @@ export const DEFAULT_SETTINGS: ExtensionSettings = {
     dark: '#9333ea',
     light: '#ffffff'
   },
-  autoGenerate: true,
+  autoGenerate: false,  // Disable auto-popup by default
   showNotifications: true,
   theme: 'dark',
   debugMode: process.env.NODE_ENV === 'development',

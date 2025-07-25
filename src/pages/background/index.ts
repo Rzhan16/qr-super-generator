@@ -51,8 +51,8 @@ async function initializeExtensionData() {
     
     // Set default values if not present
     const defaults = {
-      autoGenerate: true,
-      showWidget: true,
+      autoGenerate: false,  // Disable auto-popup by default
+      showWidget: false,    // Disable auto-widget by default
       settings: {
         defaultSize: 256,
         defaultErrorCorrection: 'M',
@@ -350,10 +350,11 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url) {
     debug.debug('Background', '📄 Tab updated', { tabId, url: tab.url });
     
-    // Check if auto-generation is enabled
+    // Check if auto-generation is enabled - only trigger if explicitly enabled
     try {
       const result = await chrome.storage.local.get(['autoGenerate', 'showWidget']);
-      if (result.autoGenerate && result.showWidget && 
+      // Require both settings to be explicitly set to true
+      if (result.autoGenerate === true && result.showWidget === true && 
           (tab.url.startsWith('http://') || tab.url.startsWith('https://'))) {
         
         // Small delay to ensure content script is ready

@@ -62,8 +62,8 @@ async function initializeExtensionData() {
     
     // Set default values if not present
     const defaults = {
-      autoGenerate: true,
-      showWidget: true,
+      autoGenerate: false,  // Disable auto-popup by default
+      showWidget: false,    // Disable auto-widget by default
       settings: {
         defaultSize: 256,
         defaultErrorCorrection: 'M',
