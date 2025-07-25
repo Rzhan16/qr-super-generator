@@ -33,8 +33,8 @@ function QRWidget() {
   useEffect(() => {
     console.log('🚀 QR Super Generator content script loaded');
     
-    // Check if auto-generation is enabled
-    checkAutoGenerationSettings();
+    // Auto-generation disabled - widget only shows when explicitly requested
+    // checkAutoGenerationSettings(); // DISABLED - no auto-popup
     
     // Listen for URL changes (SPA navigation)
     let lastUrl = location.href;
@@ -77,8 +77,8 @@ function QRWidget() {
     console.log('📄 URL changed:', url);
     if (url.startsWith('http://') || url.startsWith('https://')) {
       setState(prev => ({ ...prev, currentUrl: url }));
-      // Only auto-generate if explicitly enabled
-      checkAutoGenerationSettings();
+      // Auto-generation disabled - no popup on navigation
+      // checkAutoGenerationSettings(); // DISABLED - no auto-popup
     }
   };
 
@@ -320,7 +320,7 @@ function QRWidget() {
             <div className="qr-widget-error">
               <p>Failed to generate QR code</p>
               <button 
-                onClick={() => generateQRCode(state.currentUrl)}
+                onClick={() => generateQRCode(state.currentUrl, true)} // Force show on retry
                 className="qr-retry-btn"
               >
                 Retry
