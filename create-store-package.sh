@@ -15,6 +15,10 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Step 1.5: Fix service worker issues
+echo "🔧 Fixing service worker issues..."
+./fix-service-worker.sh
+
 # Step 2: Create ZIP package
 echo "📁 Creating ZIP package..."
 cd dist_chrome

@@ -6,7 +6,8 @@
  */
 
 import { debug } from '../../utils/debug';
-import { analyticsWorker } from '../../background/analytics-worker';
+// Dynamic import for analytics worker to avoid module loading issues
+// import { analyticsWorker } from '../../background/analytics-worker';
 
 console.log('🚀 QR Super Generator background script loaded');
 
@@ -21,13 +22,14 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     await setupContextMenus();
     await initializeExtensionData();
     
-    // Initialize analytics worker
+    // Initialize analytics worker with dynamic import
     try {
+      const { analyticsWorker } = await import('../../background/analytics-worker');
       await analyticsWorker.scheduleAggregation();
       await analyticsWorker.scheduleCleanup();
       debug.info('Background', '📊 Analytics worker initialized');
     } catch (error) {
-      debug.error('Background', '❌ Analytics worker initialization failed', error);
+      debug.error('Background', '❌ Analytics worker initialization failed', error as Error);
     }
     
     debug.info('Background', '✅ Extension setup completed', { reason: details.reason });
