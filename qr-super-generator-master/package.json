@@ -1,0 +1,64 @@
+{
+  "name": "qr-super-generator",
+  "version": "1.0.0",
+  "description": "QR Super Generator - Advanced Chrome Extension for QR Code Generation with Analytics and Batch Processing",
+  "main": "dist/popup.js",
+  "scripts": {
+    "build": "npm run clean && npm run generate-icons && webpack --mode=production",
+    "dev": "npm run generate-icons && webpack --mode=development --watch",
+    "clean": "rm -rf dist",
+    "generate-icons": "node scripts/generate-icons.js",
+    "package": "npm run build && cd dist && zip -r ../qr-super-generator.zip .",
+    "type-check": "tsc --noEmit",
+    "lint": "echo 'Linting not configured yet'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rzhan16/qr-super-generator.git"
+  },
+  "keywords": [
+    "chrome-extension",
+    "qr-code",
+    "qr-generator",
+    "productivity",
+    "browser-extension",
+    "react",
+    "typescript"
+  ],
+  "author": "Raymond",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Rzhan16/qr-super-generator/issues"
+  },
+  "homepage": "https://github.com/Rzhan16/qr-super-generator#readme",
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.11",
+    "@types/chrome": "^0.1.1",
+    "@types/file-saver": "^2.0.7",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "autoprefixer": "^10.4.21",
+    "clean-webpack-plugin": "^4.0.0",
+    "copy-webpack-plugin": "^13.0.0",
+    "css-loader": "^7.1.2",
+    "html-webpack-plugin": "^5.6.3",
+    "postcss": "^8.5.6",
+    "postcss-loader": "^8.1.1",
+    "style-loader": "^4.0.0",
+    "tailwindcss": "^4.1.11",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.3",
+    "webpack": "^5.100.2",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "file-saver": "^2.0.5",
+    "jszip": "^3.10.1",
+    "lucide-react": "^0.525.0",
+    "qrcode": "^1.5.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  }
+}

@@ -1,0 +1,62 @@
+You are an expert Chrome Extension developer building "QR Super Generator".
+
+## Tech Stack
+- Chrome Extension Manifest V3
+- React 18 + TypeScript
+- Tailwind CSS
+- Webpack bundling
+- QRCode.js library
+
+## Code Standards
+- Use TypeScript strict mode
+- Functional React components with hooks
+- Tailwind utility classes only
+- Clean variable names
+- Comprehensive error handling
+- Chrome API best practices
+
+## File Structure
+src/
+├── manifest.json
+├── background/background.ts
+├── popup/
+│   ├── popup.html
+│   ├── popup.tsx
+│   └── components/
+├── utils/
+│   ├── qr-generator.ts
+│   ├── storage.ts
+│   └── analytics.ts
+└── types/index.ts
+
+## Priorities
+1. Core QR generation (URL, WiFi, vCard)
+2. Clean UI with Tailwind
+3. Chrome APIs integration
+4. Analytics tracking
+5. Batch processing
+6. Chrome Web Store compliance
+
+## Always Include
+- Proper TypeScript types
+- Error boundaries
+- Chrome API error handling
+- Performance optimization
+- Security best practices
+- User feedback systems
+
+## IMPORTANT: Git Workflow
+After completing ANY prompt or making changes:
+1. ALWAYS run: git add .
+2. ALWAYS commit with descriptive message: git commit -m "Brief description of changes"
+3. ALWAYS push to GitHub: git push origin master
+4. Use descriptive commit messages that explain what was implemented
+
+## Git Commit Message Format
+- "feat: implement [feature]" for new features
+- "fix: resolve [issue]" for bug fixes
+- "style: update [component] styling" for UI changes
+- "config: update [configuration]" for config changes
+- "docs: update [documentation]" for documentation
+
+Generate production-ready code that works immediately. 

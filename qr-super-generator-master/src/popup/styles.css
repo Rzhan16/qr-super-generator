@@ -1,0 +1,505 @@
+/* Tailwind CSS imports */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom CSS for QR Super Generator Popup */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    width: 400px;
+    min-height: 600px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: linear-gradient(135deg, #0c0e19 0%, #1a1d2e 50%, #2d1b69 100%);
+    color: #f8fafc;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 20%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(147, 51, 234, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  
+  #root {
+    width: 100%;
+    min-height: 600px;
+    position: relative;
+  }
+  
+  /* Glassmorphism base styles */
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  }
+  
+  .glass-dark {
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  }
+}
+
+@layer components {
+  /* Button variants */
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-500;
+  }
+  
+  .btn-success {
+    @apply bg-success text-white hover:bg-green-600;
+  }
+  
+  .btn-danger {
+    @apply bg-error text-white hover:bg-red-600;
+  }
+  
+  /* Input styles */
+  .input-field {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg 
+           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+           placeholder-gray-400 text-sm;
+  }
+  
+  .input-error {
+    @apply border-red-500 focus:ring-red-500;
+  }
+  
+  /* Card styles */
+  .card {
+    @apply bg-white rounded-lg border border-gray-200 shadow-sm;
+  }
+  
+  .card-header {
+    @apply px-4 py-3 border-b border-gray-200;
+  }
+  
+  .card-body {
+    @apply px-4 py-3;
+  }
+  
+  /* QR Code preview styles */
+  .qr-preview {
+    @apply relative bg-white rounded-lg border-2 border-dashed border-gray-300 
+           hover:border-blue-400 transition-colors duration-200;
+  }
+  
+  .qr-preview.has-qr {
+    @apply border-solid border-gray-200;
+  }
+  
+  /* Loading states */
+  .loading-spinner {
+    @apply animate-spin rounded-full border-2 border-gray-300 border-t-blue-600;
+  }
+  
+  /* Notification styles */
+  .notification {
+    @apply fixed top-4 right-4 p-3 rounded-lg shadow-lg z-50 
+           transition-all duration-300 transform;
+  }
+  
+  .notification-success {
+    @apply bg-success text-white;
+  }
+  
+  .notification-error {
+    @apply bg-error text-white;
+  }
+  
+  .notification-warning {
+    @apply bg-warning text-white;
+  }
+  
+  .notification-info {
+    @apply bg-blue-500 text-white;
+  }
+}
+
+@layer utilities {
+  /* Custom utilities */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-gray-100;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
+  }
+  
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  .animate-bounce-in {
+    animation: bounceIn 0.4s ease-out;
+  }
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes glassFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(5px) rotate(-1deg);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulseNeon {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(147, 51, 234, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(147, 51, 234, 0.6), 0 0 40px rgba(59, 130, 246, 0.3);
+  }
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Pulse animation for loading states */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Focus styles for accessibility */
+.focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* Custom checkbox and radio styles */
+.custom-checkbox {
+  @apply w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded 
+         focus:ring-blue-500 focus:ring-2;
+}
+
+.custom-radio {
+  @apply w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 
+         focus:ring-blue-500 focus:ring-2;
+}
+
+/* Tooltip styles */
+.tooltip {
+  @apply absolute z-50 px-2 py-1 text-xs text-white bg-gray-900 rounded shadow-lg
+         opacity-0 pointer-events-none transition-opacity duration-200;
+}
+
+.tooltip.show {
+  @apply opacity-100;
+}
+
+/* Progress bar */
+.progress-bar {
+  @apply w-full bg-gray-200 rounded-full h-2 overflow-hidden;
+}
+
+.progress-fill {
+  @apply h-full bg-primary-600 transition-all duration-300 ease-out;
+}
+
+/* Tab navigation */
+.tab-list {
+  @apply flex border-b border-gray-200;
+}
+
+.tab-button {
+  @apply px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 
+         border-b-2 border-transparent hover:border-gray-300;
+}
+
+.tab-button.active {
+  @apply text-blue-600 border-blue-600;
+}
+
+/* Dropdown styles */
+.dropdown {
+  @apply relative;
+}
+
+.dropdown-menu {
+  @apply absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 
+         rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto;
+}
+
+.dropdown-item {
+  @apply px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer
+         first:rounded-t-lg last:rounded-b-lg;
+}
+
+.dropdown-item.selected {
+  @apply bg-blue-50 text-blue-700;
+}
+
+/* QR code specific styles */
+.qr-canvas {
+  @apply mx-auto block rounded-lg shadow-sm;
+}
+
+.qr-options-grid {
+  @apply grid grid-cols-2 gap-3;
+}
+
+.color-picker {
+  @apply w-full h-10 border border-gray-300 rounded cursor-pointer
+         hover:border-gray-400 transition-colors;
+}
+
+/* Glassmorphism specific utilities */
+@layer utilities {
+  .glass-card {
+    @apply relative backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6 transition-all duration-300 hover:bg-white/15 hover:border-white/30 shadow-glass;
+  }
+  
+  .glass-button {
+    @apply relative backdrop-blur-lg bg-white/10 border border-white/20 rounded-lg px-4 py-2 transition-all duration-300 hover:bg-white/20 hover:border-white/30 active:scale-95 shadow-glass-sm;
+  }
+  
+  .glass-input {
+    @apply relative backdrop-blur-lg bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-400 focus:border-primary-400/50 transition-all duration-300;
+  }
+  
+  .glass-dark {
+    @apply relative backdrop-blur-xl bg-black/20 border border-white/10 rounded-xl transition-all duration-300;
+  }
+  
+  .neon-border {
+    @apply border border-primary-400 shadow-neon;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-300 via-purple-400 to-accent-300 bg-clip-text text-transparent;
+  }
+  
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  .floating-element {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .glow-primary {
+    box-shadow: 0 0 20px rgba(147, 51, 234, 0.4), 0 0 40px rgba(147, 51, 234, 0.2);
+  }
+  
+  .glow-accent {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2);
+  }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 420px) {
+  body {
+    width: 100vw;
+  }
+  
+  .qr-options-grid {
+    @apply grid-cols-1;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .qr-preview {
+    @apply border-none shadow-none;
+  }
+}
+
+/* Scrollbar styling for dark theme */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(147, 51, 234, 0.5);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(147, 51, 234, 0.7);
+}
+
+/* Selection styling */
+::selection {
+  background: rgba(147, 51, 234, 0.3);
+  color: #f8fafc;
+}
+
+/* Focus ring for accessibility */
+.focus-visible {
+  @apply outline-none ring-2 ring-primary-500 ring-opacity-50;
+}
