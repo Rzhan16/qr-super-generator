@@ -6,22 +6,22 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { QrCode, Settings, History, Bug, Zap, Wifi, Layers, TestTube, AlertTriangle } from 'lucide-react';
+import { QrCode, Settings, History, Zap, Wifi, Layers, BarChart3, AlertTriangle } from 'lucide-react';
 import { debug } from '../../utils/debug';
 import { qrService } from '../../utils/qr-service';
 import { storageService } from '../../utils/storage-service';
 import { QRCodeData, QRCodeType } from '../../types';
 import chromeAPIs from '../../utils/chrome-apis';
-import DebugPanel from '../../components/DebugPanel';
 import QRGenerator from '../../components/QRGenerator';
 import WiFiQRGenerator from '../../components/WiFiQRGenerator';
 import BatchGenerator from '../../components/BatchGenerator';
+import PremiumFeatures from '../../components/PremiumFeatures';
 
 interface PopupState {
-  activeTab: 'quick' | 'generator' | 'wifi' | 'batch' | 'history' | 'debug';
+  activeTab: 'quick' | 'generator' | 'wifi' | 'batch' | 'history' | 'premium';
   error: string | null;
   history: QRCodeData[];
-  debugPanelOpen: boolean;
+  showPremium: boolean;
   currentTabInfo: any;
   pendingGeneration: any;
 }
@@ -31,7 +31,7 @@ export default function Popup() {
     activeTab: 'quick',
     error: null,
     history: [],
-    debugPanelOpen: false,
+    showPremium: false,
     currentTabInfo: null,
     pendingGeneration: null
   });
@@ -233,11 +233,11 @@ export default function Popup() {
               </button>
             )}
             <button
-              onClick={() => setState(prev => ({ ...prev, debugPanelOpen: true }))}
+              onClick={() => setState(prev => ({ ...prev, showPremium: true }))}
               className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-              title="Open Debug Panel"
+              title="Premium Features"
             >
-              <Bug className="w-4 h-4" />
+              <BarChart3 className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -261,7 +261,7 @@ export default function Popup() {
             { id: 'wifi', icon: Wifi, label: 'WiFi' },
             { id: 'batch', icon: Layers, label: 'Batch' },
             { id: 'history', icon: History, label: 'History' },
-            { id: 'debug', icon: TestTube, label: 'Debug' }
+            { id: 'premium', icon: BarChart3, label: 'Premium' }
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = state.activeTab === tab.id;
@@ -420,70 +420,16 @@ export default function Popup() {
           </div>
         )}
 
-        {state.activeTab === 'debug' && (
-          <div className="space-y-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-              <h3 className="font-semibold mb-3 flex items-center">
-                <TestTube className="w-5 h-5 mr-2 text-green-400" />
-                Debug & Testing
-              </h3>
-              
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <button
-                  onClick={() => setState(prev => ({ ...prev, debugPanelOpen: true }))}
-                  className="p-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-                >
-                  🔧 Debug Panel
-                </button>
-                <button
-                  onClick={generateTestData}
-                  className="p-3 bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
-                >
-                  🎲 Test Data
-                </button>
-                <button
-                  onClick={() => {
-                    console.log('QR Service:', qrService);
-                    console.log('Storage Service:', storageService);
-                    console.log('Chrome APIs:', chromeAPIs);
-                    console.log('Debug Logger:', debug);
-                    debug.info(component, 'Console objects logged for inspection');
-                  }}
-                  className="p-3 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
-                >
-                  📊 Console Log
-                </button>
-                <button
-                  onClick={() => {
-                    // Trigger a test error for debugging
-                    debug.error(component, 'Test error triggered', new Error('This is a test error'));
-                  }}
-                  className="p-3 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-                >
-                  ⚠️ Test Error
-                </button>
-              </div>
-            </div>
-
-            {/* Extension Info */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-              <h4 className="font-medium mb-2">Extension Info</h4>
-              <div className="text-xs text-gray-300 space-y-1">
-                <p>Version: {chromeAPIs.getExtensionVersion()}</p>
-                <p>Context: {chromeAPIs.isExtensionContext() ? 'Extension' : 'Web'}</p>
-                <p>Current Tab: {state.currentTabInfo?.title || 'Unknown'}</p>
-                <p>History Items: {state.history.length}</p>
-              </div>
-            </div>
-          </div>
+        {state.activeTab === 'premium' && (
+          <PremiumFeatures 
+            onFeatureClick={(feature) => {
+              debug.info(component, '✨ Premium feature clicked', { featureId: feature.id });
+            }}
+          />
         )}
       </div>
 
-      {/* Debug Panel */}
-      <DebugPanel
-        isOpen={state.debugPanelOpen}
-        onClose={() => setState(prev => ({ ...prev, debugPanelOpen: false }))}
-      />
+      {/* Premium Modal overlay handled by PremiumFeatures component */}
     </div>
   );
 }

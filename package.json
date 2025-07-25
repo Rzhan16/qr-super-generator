@@ -10,6 +10,7 @@
   "scripts": {
     "build": "vite build --config vite.config.chrome.ts",
     "build:chrome": "vite build --config vite.config.chrome.ts",
+    "build:chrome:prod": "webpack --config webpack.prod.js",
     "build:firefox": "vite build --config vite.config.firefox.ts",
     "dev": "nodemon --config nodemon.chrome.json",
     "dev:chrome": "nodemon --config nodemon.chrome.json",
@@ -44,6 +45,9 @@
     "@typescript-eslint/eslint-plugin": "^7.8.0",
     "@typescript-eslint/parser": "^7.18.0",
     "@vitejs/plugin-react": "^4.6.0",
+    "compression-webpack-plugin": "^11.0.0",
+    "css-loader": "^7.1.2",
+    "css-minimizer-webpack-plugin": "^8.0.0",
     "eslint": "^9.28.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-import": "^2.31.0",
@@ -53,9 +57,17 @@
     "fs-extra": "^11.3.0",
     "nodemon": "^3.1.10",
     "tailwindcss": "^4.1.8",
+    "postcss": "^8.4.47",
+    "postcss-loader": "^8.1.1",
+    "style-loader": "^4.0.0",
+    "terser-webpack-plugin": "^5.3.11",
+    "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "webpack": "^5.96.1",
+    "webpack-bundle-analyzer": "^4.11.0",
+    "webpack-cli": "^5.1.5"
   }
 }

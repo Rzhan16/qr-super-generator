@@ -6,6 +6,7 @@
  */
 
 import { debug } from '../../utils/debug';
+import { analyticsWorker } from '../../background/analytics-worker';
 
 console.log('🚀 QR Super Generator background script loaded');
 
@@ -19,6 +20,15 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   try {
     await setupContextMenus();
     await initializeExtensionData();
+    
+    // Initialize analytics worker
+    try {
+      await analyticsWorker.scheduleAggregation();
+      await analyticsWorker.scheduleCleanup();
+      debug.info('Background', '📊 Analytics worker initialized');
+    } catch (error) {
+      debug.error('Background', '❌ Analytics worker initialization failed', error);
+    }
     
     debug.info('Background', '✅ Extension setup completed', { reason: details.reason });
   } catch (error) {
