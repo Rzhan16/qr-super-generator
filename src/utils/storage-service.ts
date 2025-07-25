@@ -138,8 +138,8 @@ export class StorageService {
 
       const result = await new Promise<T | undefined>((resolve, reject) => {
         if (typeof chrome === 'undefined' || !chrome.storage) {
-          // Fallback to localStorage for development
-          const data = localStorage.getItem(key);
+                // Fallback to localStorage for development (if available)
+      const data = typeof localStorage !== 'undefined' ? localStorage.getItem(key) : null;
           resolve(data ? JSON.parse(data) : undefined);
           return;
         }
@@ -191,10 +191,12 @@ export class StorageService {
 
       await new Promise<void>((resolve, reject) => {
         if (typeof chrome === 'undefined' || !chrome.storage) {
-          // Fallback to localStorage for development
-          Object.entries(data).forEach(([key, value]) => {
-            localStorage.setItem(key, JSON.stringify(value));
-          });
+          // Fallback to localStorage for development (if available)
+          if (typeof localStorage !== 'undefined') {
+            Object.entries(data).forEach(([key, value]) => {
+              localStorage.setItem(key, JSON.stringify(value));
+            });
+          }
           resolve();
           return;
         }
@@ -235,11 +237,19 @@ export class StorageService {
     try {
       const result = await new Promise<StorageData>((resolve, reject) => {
         if (typeof chrome === 'undefined' || !chrome.storage) {
-          // Fallback to localStorage for development
+          // Fallback to localStorage for development (if available)
           const data: StorageData = {
-            qrHistory: JSON.parse(localStorage.getItem('qrHistory') || '[]'),
-            settings: JSON.parse(localStorage.getItem('settings') || 'null') || DEFAULT_SETTINGS,
-            analytics: JSON.parse(localStorage.getItem('analytics') || 'null') || {
+            qrHistory: typeof localStorage !== 'undefined' ? JSON.parse(localStorage.getItem('qrHistory') || '[]') : [],
+            settings: typeof localStorage !== 'undefined' ? (JSON.parse(localStorage.getItem('settings') || 'null') || DEFAULT_SETTINGS) : DEFAULT_SETTINGS,
+            analytics: typeof localStorage !== 'undefined' ? (JSON.parse(localStorage.getItem('analytics') || 'null') || {
+              totalGenerated: 0,
+              typeDistribution: {},
+              dailyUsage: {},
+              averageGenerationTime: 0,
+              mostUsedFeatures: [],
+              errorCount: 0,
+              lastUpdated: new Date().toISOString()
+            }) : {
               totalGenerated: 0,
               typeDistribution: {},
               dailyUsage: {},
@@ -699,7 +709,9 @@ export class StorageService {
           });
         });
       } else {
-        localStorage.clear();
+        if (typeof localStorage !== 'undefined') {
+          localStorage.clear();
+        }
       }
 
       this.cache.clear();

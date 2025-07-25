@@ -364,7 +364,7 @@ class DebugLogger {
 
 // Create global debug instance
 export const debug = new DebugLogger({
-  enabled: process.env.NODE_ENV === 'development' || localStorage.getItem('debug-enabled') === 'true',
+      enabled: process.env.NODE_ENV === 'development' || (typeof localStorage !== 'undefined' && localStorage.getItem('debug-enabled') === 'true'),
   level: LogLevel.DEBUG
 });
 
