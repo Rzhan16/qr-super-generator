@@ -1,28 +1,46 @@
 /**
- * QR Super Generator - Background Service
+ * QR Super Generator - Background Script
  * 
- * Handles Chrome extension background functionality including:
- * - Installation and updates
- * - Context menus
- * - Tab monitoring
- * - Analytics tracking
+ * Handles extension lifecycle, context menus, message passing,
+ * and coordination between content scripts and popup
  */
 
-const EXTENSION_ID = 'qr-super-generator';
-const VERSION = '1.0.0';
+import { debug } from '../../utils/debug';
 
-console.log(`%c🚀 QR Super Generator Background Service v${VERSION}`, 
-  'background: linear-gradient(45deg, #9333ea, #3b82f6); color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;');
+console.log('🚀 QR Super Generator background script loaded');
 
-// Installation and update handling
-chrome.runtime.onInstalled.addListener((details) => {
-  console.log('🔧 Extension installed/updated:', details);
+// Initialize debug system
+debug.info('Background', '🔧 Background script initializing');
+
+// Extension installation and startup
+chrome.runtime.onInstalled.addListener(async (details) => {
+  console.log('🔧 Extension installed/updated:', details.reason);
   
-  if (details.reason === 'install') {
-    console.log('✨ First-time installation detected');
+  try {
+    await setupContextMenus();
+    await initializeExtensionData();
     
-    // Set up default settings
-    chrome.storage.local.set({
+    debug.info('Background', '✅ Extension setup completed', { reason: details.reason });
+  } catch (error) {
+    debug.error('Background', '❌ Extension setup failed', error as Error);
+  }
+});
+
+// Extension startup
+chrome.runtime.onStartup.addListener(() => {
+  console.log('🔧 Extension startup');
+  debug.info('Background', '🚀 Extension started');
+});
+
+// Initialize extension data
+async function initializeExtensionData() {
+  try {
+    const result = await chrome.storage.local.get(['autoGenerate', 'showWidget', 'settings']);
+    
+    // Set default values if not present
+    const defaults = {
+      autoGenerate: true,
+      showWidget: true,
       settings: {
         defaultSize: 256,
         defaultErrorCorrection: 'M',
@@ -30,79 +48,97 @@ chrome.runtime.onInstalled.addListener((details) => {
           dark: '#9333ea',
           light: '#ffffff'
         },
-        autoGenerate: true,
-        showNotifications: true,
         theme: 'dark',
-        debugMode: false,
-        maxHistorySize: 100
-      },
-      qrHistory: [],
-      analytics: {
-        totalGenerated: 0,
-        typeDistribution: {},
-        dailyUsage: {},
-        averageGenerationTime: 0,
-        mostUsedFeatures: [],
-        errorCount: 0,
-        lastUpdated: new Date().toISOString()
+        debugMode: true
+      }
+    };
+
+    let needsUpdate = false;
+    const updates: any = {};
+
+    Object.keys(defaults).forEach(key => {
+      if (result[key] === undefined) {
+        updates[key] = defaults[key as keyof typeof defaults];
+        needsUpdate = true;
       }
     });
-    
-    console.log('✅ Default settings initialized');
-  } else if (details.reason === 'update') {
-    console.log(`🔄 Updated from version ${details.previousVersion} to ${VERSION}`);
+
+    if (needsUpdate) {
+      await chrome.storage.local.set(updates);
+      debug.info('Background', '📝 Default settings initialized', updates);
+    }
+
+  } catch (error) {
+    debug.error('Background', '❌ Failed to initialize extension data', error as Error);
   }
-  
-  // Create context menus
-  setupContextMenus();
-});
+}
 
 // Context menu setup
-function setupContextMenus() {
+async function setupContextMenus() {
   try {
     // Remove all existing context menus first
-    chrome.contextMenus.removeAll(() => {
-      console.log('🗑️ Cleared existing context menus');
-      
-      // Create main context menu
-      chrome.contextMenus.create({
-        id: 'qr-generator-main',
-        title: 'Generate QR Code',
-        contexts: ['page', 'selection', 'link']
-      });
-      
-      // Create sub-menus for different types
-      chrome.contextMenus.create({
-        id: 'qr-generate-url',
-        parentId: 'qr-generator-main',
-        title: 'Current Page URL',
-        contexts: ['page']
-      });
-      
-      chrome.contextMenus.create({
-        id: 'qr-generate-selection',
-        parentId: 'qr-generator-main',
-        title: 'Selected Text',
-        contexts: ['selection']
-      });
-      
-      chrome.contextMenus.create({
-        id: 'qr-generate-link',
-        parentId: 'qr-generator-main',
-        title: 'Link URL',
-        contexts: ['link']
-      });
-      
-      console.log('✅ Context menus created');
+    await chrome.contextMenus.removeAll();
+    console.log('🗑️ Cleared existing context menus');
+    
+    // Create main context menu
+    chrome.contextMenus.create({
+      id: 'qr-generator-main',
+      title: 'QR Super Generator',
+      contexts: ['page', 'selection', 'link', 'image']
     });
+    
+    // Create sub-menus for different types
+    chrome.contextMenus.create({
+      id: 'qr-generate-url',
+      parentId: 'qr-generator-main',
+      title: '📄 Current Page URL',
+      contexts: ['page']
+    });
+    
+    chrome.contextMenus.create({
+      id: 'qr-generate-selection',
+      parentId: 'qr-generator-main',
+      title: '📝 Selected Text',
+      contexts: ['selection']
+    });
+    
+    chrome.contextMenus.create({
+      id: 'qr-generate-link',
+      parentId: 'qr-generator-main',
+      title: '🔗 Link URL',
+      contexts: ['link']
+    });
+
+    chrome.contextMenus.create({
+      id: 'qr-show-widget',
+      parentId: 'qr-generator-main',
+      title: '🎯 Show QR Widget',
+      contexts: ['page']
+    });
+
+    chrome.contextMenus.create({
+      id: 'qr-open-popup',
+      parentId: 'qr-generator-main',
+      title: '⚡ Open QR Generator',
+      contexts: ['page', 'selection', 'link']
+    });
+    
+    console.log('✅ Context menus created');
+    debug.info('Background', '✅ Context menus setup completed');
+    
   } catch (error) {
     console.error('❌ Failed to setup context menus:', error);
+    debug.error('Background', '❌ Context menu setup failed', error as Error);
   }
 }
 
 // Context menu click handler
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   console.log('📱 Context menu clicked:', info.menuItemId, info);
+  debug.trackUserAction('Background', 'context-menu-clicked', info.menuItemId as string, { 
+    menuItemId: info.menuItemId,
+    pageUrl: info.pageUrl 
+  });
   
   try {
     let textToGenerate = '';
@@ -121,6 +157,28 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
         textToGenerate = info.linkUrl || '';
         qrType = 'url';
         break;
+      case 'qr-show-widget':
+        // Send message to content script to show widget
+        if (tab?.id) {
+          try {
+            await chrome.tabs.sendMessage(tab.id, { type: 'SHOW_WIDGET' });
+            debug.info('Background', '✅ Widget show message sent');
+          } catch (error) {
+            debug.warn('Background', '⚠️ Failed to send widget message', error as Error);
+          }
+        }
+        return;
+      case 'qr-open-popup':
+        // Store data for popup to pick up
+        await chrome.storage.local.set({
+          pendingQRGeneration: {
+            text: info.selectionText || info.linkUrl || tab?.url || '',
+            type: info.linkUrl ? 'url' : (info.selectionText ? 'text' : 'url'),
+            timestamp: Date.now(),
+            source: 'context-menu'
+          }
+        });
+        return;
     }
     
     if (textToGenerate) {
@@ -136,136 +194,184 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
         }
       });
       
+      // Also try to send to content script for immediate display
+      if (tab?.id) {
+        try {
+          await chrome.tabs.sendMessage(tab.id, {
+            type: 'GENERATE_QR',
+            text: textToGenerate
+          });
+          debug.info('Background', '✅ QR generation message sent to content script');
+        } catch (error) {
+          debug.warn('Background', '⚠️ Failed to send message to content script', error as Error);
+        }
+      }
+      
       console.log('✅ QR generation request stored');
+      debug.info('Background', '✅ QR generation request processed', {
+        text: textToGenerate.substring(0, 50),
+        type: qrType
+      });
     }
   } catch (error) {
     console.error('❌ Context menu action failed:', error);
+    debug.error('Background', '❌ Context menu action failed', error as Error);
   }
 });
 
-// Tab update monitoring for auto-generation
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && tab.url && tab.url.startsWith('http')) {
-    console.log('🌐 Tab updated:', tab.url);
-    
-    try {
-      // Get settings to check if auto-generation is enabled
-      const result = await chrome.storage.local.get(['settings']);
-      const settings = result.settings;
-      
-      if (settings?.autoGenerate) {
-        console.log('⚡ Auto-generation enabled for new tab');
-        // This will be handled by the popup when it opens
-      }
-    } catch (error) {
-      console.error('❌ Failed to check auto-generation settings:', error);
-    }
-  }
-});
-
-// Message passing between content scripts and popup
+// Message handling for communication between components
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log('📨 Message received:', message, 'from:', sender);
-  
+  console.log('📨 Background received message:', message.type, sender);
+  debug.info('Background', '📨 Message received', { type: message.type, sender: sender.tab?.url });
+
   switch (message.type) {
-    case 'get-tab-info':
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const tab = tabs[0];
-        sendResponse({
-          url: tab?.url,
-          title: tab?.title,
-          favIconUrl: tab?.favIconUrl
-        });
-      });
+    case 'GENERATE_QR_CONTENT':
+      handleContentQRGeneration(message, sendResponse);
       return true; // Keep channel open for async response
-      
-    case 'analytics-update':
-      updateAnalytics(message.data)
-        .then(() => sendResponse({ success: true }))
-        .catch(error => sendResponse({ success: false, error: error.message }));
+
+    case 'GET_CURRENT_TAB':
+      handleGetCurrentTab(sendResponse);
       return true;
-      
-    case 'debug-log':
-      if (message.level === 'error') {
-        console.error('🔴 Popup Error:', message.message, message.data);
-      } else {
-        console.log('🔵 Popup Debug:', message.message, message.data);
-      }
-      sendResponse({ success: true });
+
+    case 'SHOW_NOTIFICATION':
+      handleShowNotification(message);
       break;
-      
+
+    case 'TRACK_EVENT':
+      debug.trackEvent('Background', message.eventName, message.eventData);
+      break;
+
     default:
-      console.warn('⚠️ Unknown message type:', message.type);
+      debug.warn('Background', '⚠️ Unknown message type', { type: message.type });
   }
 });
 
-// Analytics helper function
-async function updateAnalytics(analyticsData: any) {
+// Handle QR generation requests from content scripts
+async function handleContentQRGeneration(message: any, sendResponse: (response: any) => void) {
   try {
-    const result = await chrome.storage.local.get(['analytics']);
-    const currentAnalytics = result.analytics || {
-      totalGenerated: 0,
-      typeDistribution: {},
-      dailyUsage: {},
-      averageGenerationTime: 0,
-      mostUsedFeatures: [],
-      errorCount: 0,
-      lastUpdated: new Date().toISOString()
-    };
+    debug.info('Background', '🎯 Generating QR for content script', {
+      text: message.text?.substring(0, 50),
+      options: message.options
+    });
+
+    // Import QR service dynamically
+    const { qrService } = await import('../../utils/qr-service');
     
-    // Merge analytics data
-    const updatedAnalytics = {
-      ...currentAnalytics,
-      ...analyticsData,
-      lastUpdated: new Date().toISOString()
-    };
-    
-    await chrome.storage.local.set({ analytics: updatedAnalytics });
-    console.log('📊 Analytics updated:', updatedAnalytics);
+    const qrData = await qrService.generateQRCode(
+      message.text,
+      message.options || {
+        width: 200,
+        color: {
+          dark: '#9333ea',
+          light: '#ffffff'
+        }
+      },
+      'url'
+    );
+
+    sendResponse({
+      success: true,
+      dataUrl: qrData.dataUrl,
+      qrData: qrData
+    });
+
+    debug.info('Background', '✅ QR generated for content script', { id: qrData.id });
+
   } catch (error) {
-    console.error('❌ Failed to update analytics:', error);
+    console.error('❌ Content QR generation failed:', error);
+    debug.error('Background', '❌ Content QR generation failed', error as Error);
+    
+    sendResponse({
+      success: false,
+      error: (error as Error).message
+    });
   }
 }
 
-// Periodic cleanup and maintenance
-setInterval(async () => {
+// Handle current tab requests
+async function handleGetCurrentTab(sendResponse: (response: any) => void) {
   try {
-    console.log('🧹 Running periodic maintenance...');
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    const currentTab = tabs[0];
     
-    // Clean up old pending QR generations (older than 1 minute)
-    const result = await chrome.storage.local.get(['pendingQRGeneration']);
-    if (result.pendingQRGeneration) {
-      const age = Date.now() - result.pendingQRGeneration.timestamp;
-      if (age > 60000) { // 1 minute
-        await chrome.storage.local.remove(['pendingQRGeneration']);
-        console.log('🗑️ Cleaned up old pending QR generation');
-      }
-    }
-    
-    // Update daily usage tracking
-    const today = new Date().toISOString().split('T')[0];
-    const analyticsResult = await chrome.storage.local.get(['analytics']);
-    if (analyticsResult.analytics) {
-      const analytics = analyticsResult.analytics;
-      if (!analytics.dailyUsage[today]) {
-        analytics.dailyUsage[today] = 0;
-        await chrome.storage.local.set({ analytics });
-        console.log('📅 Initialized daily usage tracking for', today);
-      }
-    }
+    sendResponse({
+      success: true,
+      tab: currentTab ? {
+        id: currentTab.id,
+        url: currentTab.url,
+        title: currentTab.title,
+        favIconUrl: currentTab.favIconUrl
+      } : null
+    });
+
+    debug.info('Background', '✅ Current tab info provided');
     
   } catch (error) {
-    console.error('❌ Maintenance task failed:', error);
+    debug.error('Background', '❌ Failed to get current tab', error as Error);
+    sendResponse({
+      success: false,
+      error: (error as Error).message
+    });
   }
-}, 60000); // Run every minute
+}
 
-// Error handling
-self.addEventListener('error', (event) => {
-  console.error('💥 Background script error:', event.error);
+// Handle notification requests
+async function handleShowNotification(message: any) {
+  try {
+    if (chrome.notifications) {
+      await chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'icon-128.png',
+        title: message.title || 'QR Super Generator',
+        message: message.message || 'Action completed'
+      });
+      
+      debug.info('Background', '✅ Notification shown', { title: message.title });
+    }
+  } catch (error) {
+    debug.error('Background', '❌ Failed to show notification', error as Error);
+  }
+}
+
+// Tab updates - monitor for URL changes
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'complete' && tab.url) {
+    debug.debug('Background', '📄 Tab updated', { tabId, url: tab.url });
+    
+    // Check if auto-generation is enabled
+    try {
+      const result = await chrome.storage.local.get(['autoGenerate', 'showWidget']);
+      if (result.autoGenerate && result.showWidget && 
+          (tab.url.startsWith('http://') || tab.url.startsWith('https://'))) {
+        
+        // Small delay to ensure content script is ready
+        setTimeout(async () => {
+          try {
+            await chrome.tabs.sendMessage(tabId, {
+              type: 'GENERATE_QR',
+              text: tab.url
+            });
+          } catch (error) {
+            // Content script might not be ready yet, ignore
+            debug.debug('Background', '⚠️ Content script not ready for auto-generation');
+          }
+        }, 1000);
+      }
+    } catch (error) {
+      debug.warn('Background', '⚠️ Failed to check auto-generation settings', error as Error);
+    }
+  }
 });
 
-self.addEventListener('unhandledrejection', (event) => {
-  console.error('💥 Unhandled promise rejection:', event.reason);
-});
+// Keep service worker alive with periodic activity
+if (chrome.alarms) {
+  chrome.alarms.create('keepAlive', { periodInMinutes: 1 });
+  chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === 'keepAlive') {
+      debug.trace('Background', '💓 Keep alive ping');
+    }
+  });
+}
 
-console.log('✅ Background service initialization complete');
+debug.info('Background', '✅ Background script initialization completed');
+

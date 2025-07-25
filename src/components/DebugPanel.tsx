@@ -87,7 +87,11 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ isOpen, onClose }) => {
       const storageUsage = await storageService.getStorageUsage();
       
       const systemState: SystemState = {
-        performance: qrStats,
+        performance: {
+          generationCount: qrStats.totalGenerated,
+          averageTime: qrStats.averageGenerationTime,
+          totalTime: qrStats.totalGenerationTime
+        },
         storage: storageUsage,
         extension: {
           version: '1.0.0',
@@ -219,7 +223,7 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ isOpen, onClose }) => {
       try {
         const validText = TypeValidator.validateQRText('Valid text');
         const invalidText = TypeValidator.validateQRText('');
-        const validEmail = TypeValidator.validateEmail('test@example.com');
+        const validEmail = TypeValidator.validateEmail('demo@qr-generator.com');
         const invalidEmail = TypeValidator.validateEmail('invalid-email');
 
         if (validText.isValid && !invalidText.isValid && validEmail.isValid && !invalidEmail.isValid) {

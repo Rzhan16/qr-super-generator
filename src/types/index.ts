@@ -448,7 +448,7 @@ export const TEST_CONTACT_DATA: ContactQRData = {
   lastName: 'Doe',
   organization: 'QR Super Corp',
   phone: '+1-555-123-4567',
-  email: 'john.doe@example.com',
+  email: 'contact@qr-generator.com',
   url: 'https://johndoe.com'
 };
 

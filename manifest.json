@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "QR Super Generator - Premium",
-  "description": "Premium QR code generator with debugging capabilities, batch processing, and analytics",
+  "description": "Premium QR code generator with auto-generation, specialized components (WiFi, batch), floating widget, and comprehensive debugging",
   "version": "1.0.0",
   "options_ui": {
     "page": "src/pages/options/index.html"
@@ -24,7 +24,9 @@
     "downloads",
     "clipboardWrite",
     "contextMenus",
-    "tabs"
+    "tabs",
+    "notifications",
+    "alarms"
   ],
   "content_scripts": [
     {
@@ -41,6 +43,9 @@
       ]
     }
   ],
+  "background": {
+    "service_worker": "src/pages/background/index.ts"
+  },
   "devtools_page": "src/pages/devtools/index.html",
   "web_accessible_resources": [
     {
