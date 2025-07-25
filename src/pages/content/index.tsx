@@ -63,7 +63,9 @@ function QRWidget() {
   const checkAutoGenerationSettings = async () => {
     try {
       const result = await chrome.storage.local.get(['autoGenerate', 'showWidget']);
-      if (result.autoGenerate !== false && result.showWidget !== false) {
+      // Disable auto-generation and auto-showing by default
+      // Widget will only show when explicitly requested
+      if (result.autoGenerate === true && result.showWidget === true) {
         generateQRForCurrentPage();
       }
     } catch (error) {
@@ -75,7 +77,8 @@ function QRWidget() {
     console.log('📄 URL changed:', url);
     if (url.startsWith('http://') || url.startsWith('https://')) {
       setState(prev => ({ ...prev, currentUrl: url }));
-      generateQRForCurrentPage();
+      // Only auto-generate if explicitly enabled
+      checkAutoGenerationSettings();
     }
   };
 
