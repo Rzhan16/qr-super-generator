@@ -108,6 +108,28 @@ function QRWidget() {
     }
   };
 
+  // Fire-and-forget history storage helper - errors here don't affect user-facing QR generation
+  const storeQrDataInHistory = (qrData: any) => {
+    // Check if chrome.runtime is available
+    if (!chrome?.runtime) {
+      console.debug('Chrome runtime not available for history storage');
+      return;
+    }
+
+    try {
+      chrome.runtime.sendMessage({
+        type: 'STORE_QR_DATA',
+        qrData
+      }).catch((error: any) => {
+        // Completely ignore all storage errors - they are non-critical
+        console.debug('History storage failed (non-critical):', error?.message || 'Unknown error');
+      });
+    } catch (error) {
+      // Completely ignore all storage errors - they are non-critical
+      console.debug('History storage error (non-critical):', error);
+    }
+  };
+
   const generateQRCode = async (text: string) => {
     setState(prev => ({ 
       ...prev, 
@@ -133,35 +155,25 @@ function QRWidget() {
 
       const dataUrl = await QRCode.toDataURL(text, qrOptions);
 
+      // QR Generation completed successfully - update UI immediately
       setState(prev => ({
         ...prev,
         qrDataUrl: dataUrl,
         isGenerating: false
       }));
 
-      // Store QR data in extension storage for history
-      try {
-        const qrData = {
-          text,
-          dataUrl,
-          timestamp: Date.now(),
-          id: Date.now().toString(),
-          type: text.startsWith('http') ? 'url' : 'text'
-        };
-
-        chrome.runtime.sendMessage({
-          type: 'STORE_QR_DATA',
-          qrData
-        }).catch(() => {
-          // Ignore storage errors - QR still works
-          console.debug('Could not store QR in history');
-        });
-      } catch (storageError) {
-        // Ignore storage errors - QR generation still succeeded
-        console.debug('Could not store QR data:', storageError);
-      }
-
       console.log('✅ QR code generated successfully');
+
+      // Store in history - FIRE AND FORGET (completely separate from QR generation success)
+      const qrData = {
+        text,
+        dataUrl,
+        timestamp: Date.now(),
+        id: Date.now().toString(),
+        type: text.startsWith('http') ? 'url' : 'text'
+      };
+      
+      storeQrDataInHistory(qrData);
 
     } catch (error) {
       console.error('❌ QR generation failed:', error);
