@@ -24,6 +24,7 @@ interface PopupState {
   // showPremium: boolean; // Removed for free version
   currentTabInfo: any;
   pendingGeneration: any;
+  showWidget: boolean; // Widget auto-show setting
 }
 
 export default function Popup() {
@@ -33,7 +34,8 @@ export default function Popup() {
     history: [],
     // showPremium: false, // Removed for free version
     currentTabInfo: null,
-    pendingGeneration: null
+    pendingGeneration: null,
+    showWidget: false // Default to false
   });
 
   const component = 'Popup';
@@ -46,7 +48,41 @@ export default function Popup() {
     loadHistory();
     checkPendingGeneration();
     getCurrentTabInfo();
+    loadWidgetSetting(); // Load widget setting
   }, []);
+
+  // Load widget auto-show setting
+  const loadWidgetSetting = async () => {
+    try {
+      const result = await chrome.storage.local.get(['showWidget']);
+      setState(prev => ({ 
+        ...prev, 
+        showWidget: result.showWidget === true 
+      }));
+    } catch (error) {
+      debug.warn(component, 'Failed to load widget setting', error as Error);
+    }
+  };
+
+  // Toggle widget auto-show setting
+  const toggleWidgetSetting = async () => {
+    try {
+      const newValue = !state.showWidget;
+      await chrome.storage.local.set({ showWidget: newValue });
+      setState(prev => ({ ...prev, showWidget: newValue }));
+      
+      debug.info(component, `Widget auto-show ${newValue ? 'enabled' : 'disabled'}`);
+      debug.trackUserAction(component, 'widget-toggled', newValue ? 'enabled' : 'disabled');
+      
+      // Show feedback
+      if (newValue) {
+        clearError(); // Clear any errors
+      }
+    } catch (error) {
+      debug.error(component, 'Failed to toggle widget setting', error as Error);
+      handleError('Failed to save widget setting');
+    }
+  };
 
   const initializePopup = async () => {
     try {
@@ -232,6 +268,18 @@ export default function Popup() {
                 🌐
               </button>
             )}
+            {/* Widget auto-show toggle */}
+            <button
+              onClick={toggleWidgetSetting}
+              className={`p-2 rounded-lg transition-colors ${
+                state.showWidget 
+                  ? 'bg-green-500/20 text-green-300 hover:bg-green-500/30' 
+                  : 'bg-red-500/20 text-red-300 hover:bg-red-500/30'
+              }`}
+              title={`Widget auto-show: ${state.showWidget ? 'ON' : 'OFF'}`}
+            >
+              {state.showWidget ? '👁️' : '🚫'}
+            </button>
             {/* Premium button removed for free version */}
           </div>
         </div>

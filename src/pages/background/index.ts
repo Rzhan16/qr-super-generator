@@ -361,7 +361,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         setTimeout(async () => {
           try {
             await chrome.tabs.sendMessage(tabId, {
-              type: 'GENERATE_QR',
+              type: 'AUTO_GENERATE_QR',  // Use AUTO_GENERATE_QR for auto-generation
               text: tab.url
             });
           } catch (error) {

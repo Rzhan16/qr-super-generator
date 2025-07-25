@@ -87,8 +87,12 @@ function QRWidget() {
     
     switch (message.type) {
       case 'GENERATE_QR':
+        // Force show when explicitly requested (like from context menu)
+        generateQRCode(message.text || window.location.href, true);
+        break;
       case 'AUTO_GENERATE_QR':
-        generateQRCode(message.text || window.location.href);
+        // Respect settings for auto-generation
+        generateQRCode(message.text || window.location.href, false);
         break;
       case 'SHOW_WIDGET':
         setState(prev => ({ ...prev, visible: true }));
@@ -107,7 +111,7 @@ function QRWidget() {
   const generateQRForCurrentPage = () => {
     const url = window.location.href;
     if (url.startsWith('http://') || url.startsWith('https://')) {
-      generateQRCode(url);
+      generateQRCode(url, true); // Force show when manually triggered
     }
   };
 
@@ -133,12 +137,25 @@ function QRWidget() {
     }
   };
 
-  const generateQRCode = async (text: string) => {
+  const generateQRCode = async (text: string, forceShow: boolean = false) => {
+    // Check if widget should be shown
+    let shouldShowWidget = forceShow;
+    
+    if (!forceShow) {
+      try {
+        const result = await chrome.storage.local.get(['showWidget']);
+        shouldShowWidget = result.showWidget === true;
+      } catch (error) {
+        console.debug('Could not check showWidget setting, defaulting to false');
+        shouldShowWidget = false;
+      }
+    }
+
     setState(prev => ({ 
       ...prev, 
       isGenerating: true, 
       error: null,
-      visible: true,
+      visible: shouldShowWidget, // Only show if setting allows or forced
       currentUrl: text
     }));
 
