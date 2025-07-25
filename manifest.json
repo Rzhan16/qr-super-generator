@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "name in manifest.json",
-  "description": "description in manifest.json",
+  "name": "QR Super Generator - Premium",
+  "description": "Premium QR code generator with debugging capabilities, batch processing, and analytics",
+  "version": "1.0.0",
   "options_ui": {
     "page": "src/pages/options/index.html"
   },
@@ -18,7 +19,12 @@
     "128": "icon-128.png"
   },
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "storage",
+    "downloads",
+    "clipboardWrite",
+    "contextMenus",
+    "tabs"
   ],
   "content_scripts": [
     {

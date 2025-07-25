@@ -1,7 +1,7 @@
 {
-  "name": "vite-web-extension",
-  "version": "1.4.0",
-  "description": "A simple chrome & firefox extension template with Vite, React, TypeScript and Tailwind CSS.",
+  "name": "qr-super-generator-vite",
+  "version": "1.0.0",
+  "description": "Premium QR code generator Chrome extension with comprehensive debugging capabilities, modern glassmorphism UI, and professional development practices.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -13,10 +13,22 @@
     "build:firefox": "vite build --config vite.config.firefox.ts",
     "dev": "nodemon --config nodemon.chrome.json",
     "dev:chrome": "nodemon --config nodemon.chrome.json",
-    "dev:firefox": "nodemon --config nodemon.firefox.json"
+    "dev:firefox": "nodemon --config nodemon.firefox.json",
+    "test": "echo 'Manual testing - see TESTING_GUIDE.md for comprehensive test procedures'",
+    "lint": "eslint src --ext .ts,.tsx",
+    "format": "prettier --write src/**/*.{ts,tsx}",
+    "clean": "rm -rf dist_chrome dist_firefox",
+    "prebuild": "npm run clean",
+    "postbuild": "echo 'Build complete! Load dist_chrome folder in Chrome extensions page.'"
   },
   "type": "module",
   "dependencies": {
+    "@types/file-saver": "^2.0.7",
+    "@types/qrcode": "^1.5.5",
+    "file-saver": "^2.0.5",
+    "jszip": "^3.10.1",
+    "lucide-react": "^0.525.0",
+    "qrcode": "^1.5.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "webextension-polyfill": "^0.12.0"
