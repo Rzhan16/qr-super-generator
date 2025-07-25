@@ -64,6 +64,14 @@ class AnalyticsService {
 
   private async initializeAnalytics() {
     try {
+      // Check if we're in a service worker context
+      if (typeof window === 'undefined' && typeof (globalThis as any).importScripts !== 'undefined') {
+        // Service worker context - disable analytics to avoid errors
+        this.isEnabled = false;
+        console.log('Analytics disabled in service worker context');
+        return;
+      }
+
       // Check user consent and settings
       const result = await chrome.storage.local.get(['analyticsEnabled', 'userId']);
       this.isEnabled = result.analyticsEnabled !== false; // Opt-out by default
@@ -76,9 +84,9 @@ class AnalyticsService {
       // Start session tracking
       this.trackEvent('session', 'start', {
         timestamp: this.sessionStart,
-        userAgent: navigator.userAgent,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        language: navigator.language
+        userAgent: navigator?.userAgent || 'Unknown',
+        timezone: Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone || 'Unknown',
+        language: navigator?.language || 'Unknown'
       });
 
       // Set up periodic flush
