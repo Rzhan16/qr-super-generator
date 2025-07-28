@@ -65,8 +65,8 @@ class DebugLogger {
       ...config
     };
 
-    console.log(`%c🔧 QR Super Generator Debug Mode Enabled`, 
-      'background: linear-gradient(45deg, #9333ea, #3b82f6); color: white; padding: 8px 16px; border-radius: 8px; font-weight: bold;');
+    // Simplified console.log to avoid minification issues
+    console.log('🔧 QR Super Generator Debug Mode Enabled');
     
     this.logSystemInfo();
   }
@@ -169,19 +169,16 @@ class DebugLogger {
       stack: error?.stack
     };
 
-    // Add to internal log storage
     this.logs.push(logEntry);
     if (this.logs.length > this.config.maxLogEntries) {
       this.logs = this.logs.slice(-this.config.maxLogEntries);
     }
 
-    // Console output with styling
+    // Simple console output without CSS styling to avoid minification issues
     const formattedMessage = this.formatMessage(level, component, message);
-    const color = this.getLogColor(level);
-    const style = `color: ${color}; font-weight: ${level >= LogLevel.WARN ? 'bold' : 'normal'}`;
 
     if (data) {
-      console.group(`%c${formattedMessage}`, style);
+      console.group(formattedMessage);
       console.log('Data:', data);
       if (error) {
         console.error('Error:', error);
@@ -189,11 +186,11 @@ class DebugLogger {
       console.groupEnd();
     } else {
       if (level >= LogLevel.ERROR) {
-        console.error(`%c${formattedMessage}`, style, error || '');
+        console.error(formattedMessage, error || '');
       } else if (level >= LogLevel.WARN) {
-        console.warn(`%c${formattedMessage}`, style);
+        console.warn(formattedMessage);
       } else {
-        console.log(`%c${formattedMessage}`, style);
+        console.log(formattedMessage);
       }
     }
   }
@@ -336,14 +333,14 @@ class DebugLogger {
   // Validation helpers
   validateQRData(data: any, component: string): boolean {
     this.debug(component, '🔍 Validating QR data', data);
-    
+
     if (!data) {
       this.error(component, '❌ Validation: QR data is null or undefined');
       return false;
     }
 
     if (typeof data.text !== 'string') {
-      this.error(component, '❌ Validation: QR text must be a string', { type: typeof data.text });
+      this.error(component, '❌ Validation: QR text must be a string', undefined, { typeReceived: typeof data.text });
       return false;
     }
 
@@ -353,7 +350,7 @@ class DebugLogger {
     }
 
     if (data.text.length > 4296) {
-      this.error(component, '❌ Validation: QR text too long', { length: data.text.length, max: 4296 });
+      this.error(component, '❌ Validation: QR text too long', undefined, { textLength: data.text.length, maxLength: 4296 });
       return false;
     }
 
