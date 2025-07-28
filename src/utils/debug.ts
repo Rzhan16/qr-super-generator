@@ -359,11 +359,24 @@ class DebugLogger {
   }
 }
 
-// Create global debug instance
-export const debug = new DebugLogger({
-      enabled: process.env.NODE_ENV === 'development' || (typeof localStorage !== 'undefined' && localStorage.getItem('debug-enabled') === 'true'),
+// Create global debug instance with named export (not default)
+const debug = new DebugLogger({
+  enabled: (typeof localStorage !== 'undefined' && localStorage.getItem('debug-enabled') === 'true'),
   level: LogLevel.DEBUG
 });
+
+// Add to global scope for debugging (browser only)
+if (typeof window !== 'undefined') {
+  // @ts-ignore
+  window.qrDebug = debug;
+  // @ts-ignore
+  window.clearQRLogs = () => debug.clearLogs();
+  // @ts-ignore
+  window.exportQRDebug = () => debug.exportDebugData();
+}
+
+// Named export to match import statements in other files
+export { debug };
 
 // Error boundary helper
 export class DebugErrorBoundary {
@@ -389,15 +402,3 @@ export class DebugErrorBoundary {
     };
   }
 }
-
-// Window debugging helpers (for development)
-if (typeof window !== 'undefined') {
-  // @ts-ignore
-  window.qrDebug = debug;
-  // @ts-ignore
-  window.clearQRLogs = () => debug.clearLogs();
-  // @ts-ignore
-  window.exportQRDebug = () => debug.exportDebugData();
-}
-
-export default debug;
