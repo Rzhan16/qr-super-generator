@@ -116,6 +116,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       getCurrentTab(sendResponse);
       return true; // Keep message channel open
       
+    case 'GET_ALL_TABS':
+      getAllTabs(sendResponse);
+      return true; // Keep message channel open
+      
+    case 'GET_HTTP_TABS':
+      getHttpTabs(sendResponse);
+      return true; // Keep message channel open
+      
     case 'TRACK_EVENT':
       console.log('📊 Event:', message.eventName, message.eventData);
       break;
@@ -144,6 +152,60 @@ async function getCurrentTab(sendResponse) {
     console.log('✅ Current tab info provided');
   } catch (error) {
     console.error('❌ Failed to get current tab:', error);
+    sendResponse({ success: false, error: error.message });
+  }
+}
+
+// Get all tabs
+async function getAllTabs(sendResponse) {
+  try {
+    const tabs = await chrome.tabs.query({});
+    
+    const tabInfos = tabs.map(tab => ({
+      id: tab.id,
+      url: tab.url,
+      title: tab.title,
+      favIconUrl: tab.favIconUrl,
+      active: tab.active,
+      windowId: tab.windowId
+    }));
+    
+    sendResponse({
+      success: true,
+      tabs: tabInfos
+    });
+    
+    console.log(`✅ Provided ${tabInfos.length} tabs for batch processing`);
+  } catch (error) {
+    console.error('❌ Failed to get all tabs:', error);
+    sendResponse({ success: false, error: error.message });
+  }
+}
+
+// Get HTTP/HTTPS tabs only
+async function getHttpTabs(sendResponse) {
+  try {
+    const tabs = await chrome.tabs.query({});
+    
+    const httpTabs = tabs
+      .filter(tab => tab.url && (tab.url.startsWith('http://') || tab.url.startsWith('https://')))
+      .map(tab => ({
+        id: tab.id,
+        url: tab.url,
+        title: tab.title,
+        favIconUrl: tab.favIconUrl,
+        active: tab.active,
+        windowId: tab.windowId
+      }));
+    
+    sendResponse({
+      success: true,
+      tabs: httpTabs
+    });
+    
+    console.log(`✅ Provided ${httpTabs.length} HTTP tabs for batch processing`);
+  } catch (error) {
+    console.error('❌ Failed to get HTTP tabs:', error);
     sendResponse({ success: false, error: error.message });
   }
 }

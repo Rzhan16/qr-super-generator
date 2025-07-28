@@ -73,26 +73,30 @@ export class ChromeAPIs {
 
   async getAllTabs(): Promise<TabInfo[]> {
     try {
-      debug.debug(this.component, '📑 Getting all tabs');
+      debug.debug(this.component, '📑 Getting all tabs via background script');
       
-      if (typeof chrome === 'undefined' || !chrome.tabs) {
-        debug.warn(this.component, '⚠️ Chrome tabs API not available');
+      if (typeof chrome === 'undefined' || !chrome.runtime) {
+        debug.warn(this.component, '⚠️ Chrome runtime API not available');
         return [];
       }
 
-      const tabs = await chrome.tabs.query({});
-      
-      const tabInfos: TabInfo[] = tabs.map(tab => ({
-        id: tab.id,
-        url: tab.url,
-        title: tab.title,
-        favIconUrl: tab.favIconUrl,
-        active: tab.active,
-        windowId: tab.windowId
-      }));
-      
-      debug.info(this.component, `✅ Retrieved ${tabInfos.length} tabs`);
-      return tabInfos;
+      return new Promise((resolve) => {
+        chrome.runtime.sendMessage({ type: 'GET_ALL_TABS' }, (response) => {
+          if (chrome.runtime.lastError) {
+            debug.error(this.component, '❌ Failed to get all tabs', new Error(chrome.runtime.lastError.message));
+            resolve([]);
+            return;
+          }
+          
+          if (response && response.success) {
+            debug.info(this.component, `✅ Retrieved ${response.tabs.length} tabs`);
+            resolve(response.tabs);
+          } else {
+            debug.warn(this.component, '⚠️ Failed to get tabs from background', response?.error);
+            resolve([]);
+          }
+        });
+      });
     } catch (error) {
       debug.error(this.component, '❌ Failed to get all tabs', error as Error);
       return [];
@@ -101,13 +105,30 @@ export class ChromeAPIs {
 
   async getOpenHttpTabs(): Promise<TabInfo[]> {
     try {
-      const allTabs = await this.getAllTabs();
-      const httpTabs = allTabs.filter(tab => 
-        tab.url && (tab.url.startsWith('http://') || tab.url.startsWith('https://'))
-      );
+      debug.debug(this.component, '🌐 Getting HTTP tabs via background script');
       
-      debug.info(this.component, `✅ Found ${httpTabs.length} HTTP/HTTPS tabs`);
-      return httpTabs;
+      if (typeof chrome === 'undefined' || !chrome.runtime) {
+        debug.warn(this.component, '⚠️ Chrome runtime API not available');
+        return [];
+      }
+
+      return new Promise((resolve) => {
+        chrome.runtime.sendMessage({ type: 'GET_HTTP_TABS' }, (response) => {
+          if (chrome.runtime.lastError) {
+            debug.error(this.component, '❌ Failed to get HTTP tabs', new Error(chrome.runtime.lastError.message));
+            resolve([]);
+            return;
+          }
+          
+          if (response && response.success) {
+            debug.info(this.component, `✅ Found ${response.tabs.length} HTTP/HTTPS tabs`);
+            resolve(response.tabs);
+          } else {
+            debug.warn(this.component, '⚠️ Failed to get HTTP tabs from background', response?.error);
+            resolve([]);
+          }
+        });
+      });
     } catch (error) {
       debug.error(this.component, '❌ Failed to get HTTP tabs', error as Error);
       return [];
