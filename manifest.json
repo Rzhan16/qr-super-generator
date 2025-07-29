@@ -33,8 +33,7 @@
     {
       "matches": [
         "http://*/*",
-        "https://*/*",
-        "<all_urls>"
+        "https://*/*"
       ],
       "js": [
         "src/pages/content/index.tsx"
