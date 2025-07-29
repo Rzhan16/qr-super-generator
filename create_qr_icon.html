@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Code Icon Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        canvas { border: 1px solid #ccc; margin: 10px; }
+        .download-section { margin: 20px 0; }
+        button { padding: 10px 20px; margin: 5px; background: #9333ea; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #7c3aed; }
+    </style>
+</head>
+<body>
+    <h1>🎯 QR Code Icon Generator</h1>
+    <p>Click the buttons below to download QR code-style icons for your extension:</p>
+    
+    <div class="download-section">
+        <canvas id="icon16" width="16" height="16"></canvas>
+        <button onclick="downloadIcon('icon16', 'icon-16.png')">Download 16x16</button>
+        
+        <canvas id="icon32" width="32" height="32"></canvas>
+        <button onclick="downloadIcon('icon32', 'icon-32.png')">Download 32x32</button>
+        
+        <canvas id="icon48" width="48" height="48"></canvas>
+        <button onclick="downloadIcon('icon48', 'icon-48.png')">Download 48x48</button>
+        
+        <canvas id="icon128" width="128" height="128"></canvas>
+        <button onclick="downloadIcon('icon128', 'icon-128.png')">Download 128x128</button>
+    </div>
+
+    <script>
+        // QR code-like pattern generator
+        function generateQRPattern(ctx, size) {
+            const cellSize = Math.floor(size / 8);
+            const pattern = [
+                [1,1,1,1,1,1,1,0],
+                [1,0,0,0,0,0,1,0],
+                [1,0,1,1,1,0,1,1],
+                [1,0,1,1,1,0,1,0],
+                [1,0,1,1,1,0,1,1],
+                [1,0,0,0,0,0,1,0],
+                [1,1,1,1,1,1,1,1],
+                [0,0,1,0,1,0,0,1]
+            ];
+
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, size, size);
+            
+            ctx.fillStyle = 'black';
+            for(let row = 0; row < 8; row++) {
+                for(let col = 0; col < 8; col++) {
+                    if(pattern[row][col] === 1) {
+                        ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+                    }
+                }
+            }
+        }
+
+        // Generate all icons
+        function generateAllIcons() {
+            const sizes = [16, 32, 48, 128];
+            sizes.forEach(size => {
+                const canvas = document.getElementById(`icon${size}`);
+                const ctx = canvas.getContext('2d');
+                generateQRPattern(ctx, size);
+            });
+        }
+
+        // Download function
+        function downloadIcon(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Generate icons on page load
+        window.onload = generateAllIcons;
+    </script>
+</body>
+</html> 
